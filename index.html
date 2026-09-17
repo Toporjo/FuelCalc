@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор часу та акумулятор палива</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      filter: invert(0.4);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-100/80 text-slate-800 min-h-screen pb-14">
+
+  <!-- Header Navigation -->
+  <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white shadow-lg sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3.5 flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-lg shadow-inner">
+          <i class="fa-solid fa-train"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight">Калькулятор обліку часу та палива</h1>
+          <p class="text-[11px] text-slate-300">Гарячий/холодний простій, маневри, рух та акумулятор палива з густиною</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="copySummaryBtn" class="flex items-center gap-2 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition px-3.5 py-2 rounded-xl font-medium shadow-sm">
+          <i class="fa-regular fa-copy"></i>
+          <span>Копіювати звіт</span>
+        </button>
+        <button id="clearAllBtn" class="flex items-center gap-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-rose-600 active:scale-95 transition px-3 py-2 rounded-xl text-slate-300 hover:text-white font-medium border border-slate-700">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Очистити все</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 pt-5 space-y-6">
+
+    <!-- Top Summary Statistics Cards -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <!-- Hot Standby Card -->
+      <div class="bg-white rounded-2xl p-3.5 border border-rose-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1">
+            <i class="fa-solid fa-fire text-xs"></i> Гарячий
+          </span>
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+        </div>
+        <div>
+          <div id="sum-hot-min" class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">0 хв</div>
+          <div id="sum-hot-hm" class="text-[11px] font-medium text-slate-500 mt-0.5 font-mono">0 год 00 хв</div>
+        </div>
+        <i class="fa-solid fa-fire absolute -right-2 -bottom-2 text-rose-50 text-4xl pointer-events-none opacity-40"></i>
+      </div>
+
+      <!-- Cold Standby Card -->
+      <div class="bg-white rounded-2xl p-3.5 border border-sky-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-sky-600 flex items-center gap-1">
+            <i class="fa-regular fa-snowflake text-xs"></i> Холодний
+          </span>
+          <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+        </div>
+        <div>
+          <div id="sum-cold-min" class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">0 хв</div>
+          <div id="sum-cold-hm" class="text-[11px] font-medium text-slate-500 mt-0.5 font-mono">0 год 00 хв</div>
+        </div>
+        <i class="fa-regular fa-snowflake absolute -right-2 -bottom-2 text-sky-50 text-4xl pointer-events-none opacity-40"></i>
+      </div>
+
+      <!-- Maneuver Card -->
+      <div class="bg-white rounded-2xl p-3.5 border border-amber-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1">
+            <i class="fa-solid fa-shuffle text-xs"></i> Маневри
+          </span>
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+        </div>
+        <div>
+          <div id="sum-maneuver-min" class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">0 хв</div>
+          <div id="sum-maneuver-hm" class="text-[11px] font-medium text-slate-500 mt-0.5 font-mono">0 год 00 хв</div>
+        </div>
+        <i class="fa-solid fa-shuffle absolute -right-2 -bottom-2 text-amber-50 text-4xl pointer-events-none opacity-40"></i>
+      </div>
+
+      <!-- Movement Card -->
+      <div class="bg-white rounded-2xl p-3.5 border border-emerald-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-1">
+            <i class="fa-solid fa-route text-xs"></i> Рух
+          </span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        </div>
+        <div>
+          <div id="sum-movement-min" class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">0 хв</div>
+          <div id="sum-movement-hm" class="text-[11px] font-medium text-slate-500 mt-0.5 font-mono">0 год 00 хв</div>
+        </div>
+        <i class="fa-solid fa-route absolute -right-2 -bottom-2 text-emerald-50 text-4xl pointer-events-none opacity-40"></i>
+      </div>
+
+      <!-- Total Time Card -->
+      <div class="bg-slate-900 text-white rounded-2xl p-3.5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1">
+            <i class="fa-solid fa-clock text-xs text-indigo-400"></i> Всього часу
+          </span>
+          <span id="record-count-badge" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0 інт.</span>
+        </div>
+        <div>
+          <div id="sum-total-min" class="text-xl sm:text-2xl font-black text-indigo-300 leading-tight">0 хв</div>
+          <div id="sum-total-hm" class="text-[11px] font-medium text-slate-300 mt-0.5 font-mono">0 год 00 хв</div>
+        </div>
+      </div>
+
+      <!-- Dual Fuel Widget Card -->
+      <div class="bg-gradient-to-br from-amber-500 via-amber-600 to-orange-600 text-white rounded-2xl p-3.5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-100 flex items-center gap-1">
+            <i class="fa-solid fa-gas-pump text-xs"></i> Паливо разом
+          </span>
+          <span id="fuel-count-badge" class="text-[10px] bg-amber-800/60 px-1.5 py-0.5 rounded font-mono">0 дій</span>
+        </div>
+        <div>
+          <div id="sum-fuel-main" class="text-xl sm:text-2xl font-black text-white leading-tight">0 <span class="fuel-unit-label font-bold text-sm">кг</span></div>
+          <div id="sum-fuel-converted" class="text-[11px] font-semibold text-amber-100 mt-0.5 font-mono">≈ 0.00 л</div>
+        </div>
+        <i class="fa-solid fa-gas-pump absolute -right-2 -bottom-2 text-white/15 text-5xl pointer-events-none"></i>
+      </div>
+    </section>
+
+    <!-- FUEL ACCUMULATOR SECTION WITH DENSITY CALCULATOR -->
+    <section class="bg-white rounded-3xl p-4 sm:p-6 border border-amber-200 shadow-md">
+      
+      <!-- Top header bar of fuel section -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-gas-pump"></i>
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              Акумулятор палива
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Інкрементний облік</span>
+            </h2>
+            <p class="text-xs text-slate-500">Додавання по кроках, сумування та взаємний перерахунок (кг ↔ л) за густиною</p>
+          </div>
+        </div>
+
+        <!-- Controls: Unit selector, undo, reset -->
+        <div class="flex items-center flex-wrap gap-2">
+          <div class="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200 text-xs font-bold">
+            <button id="unitKgBtn" type="button" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm transition">Кг (кг)</button>
+            <button id="unitLitresBtn" type="button" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">Літри (л)</button>
+          </div>
+
+          <button id="undoLastFuelBtn" title="Скасувати останню дію" class="px-2.5 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center gap-1.5 font-medium border border-slate-200">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Скасувати</span>
+          </button>
+          <button id="clearFuelBtn" title="Очистити історію палива" class="px-2.5 py-1.5 text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition flex items-center gap-1.5 font-medium border border-rose-200">
+            <i class="fa-solid fa-trash"></i>
+            <span class="hidden sm:inline">Скинути</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Density (Specific Gravity) Banner -->
+      <div class="mt-4 p-3.5 bg-gradient-to-r from-amber-50/70 via-orange-50/50 to-slate-50 rounded-2xl border border-amber-200/90 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-700 flex items-center justify-center font-bold text-sm">
+            ρ
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <span>Питома вага (густина палива):</span>
+              <span id="densityFormulaText" class="text-[11px] text-amber-700 font-mono font-medium">Об'єм (л) = Маса (кг) / ρ</span>
+            </div>
+            <p class="text-[11px] text-slate-500">Використовується для взаємного перерахунку між вагою та об'ємом</p>
+          </div>
+        </div>
+
+        <div class="flex items-center flex-wrap gap-2">
+          <div class="flex items-center bg-white px-2 py-1 rounded-xl border border-amber-300 shadow-sm">
+            <span class="text-xs font-mono font-bold text-slate-600 mr-1.5">ρ =</span>
+            <input type="number" step="0.001" min="0.5" max="1.5" id="densityInput" value="0.840"
+              class="w-20 text-xs font-mono font-bold text-slate-900 focus:outline-none text-center bg-amber-50/40 py-0.5 rounded">
+            <span class="text-[11px] font-medium text-slate-500 ml-1">кг/л</span>
+          </div>
+
+          <!-- Density presets -->
+          <div class="flex items-center gap-1 text-[11px] font-mono">
+            <span class="text-slate-400 text-[10px] uppercase font-bold mr-0.5">Швидко:</span>
+            <button type="button" onclick="setDensity(0.830)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.830</button>
+            <button type="button" onclick="setDensity(0.835)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.835</button>
+            <button type="button" onclick="setDensity(0.840)" class="density-preset-btn px-1.5 py-1 bg-amber-500 text-white border border-amber-600 rounded-lg transition font-bold shadow-sm">0.840</button>
+            <button type="button" onclick="setDensity(0.845)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.845</button>
+            <button type="button" onclick="setDensity(0.850)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.850</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fuel controls grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-4">
+        
+        <!-- Left: Quick increments & Custom addition -->
+        <div class="lg:col-span-7 space-y-4">
+          <!-- Increments -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Швидкі інкременти (додати):
+              </label>
+              <span class="text-[11px] text-amber-700 font-medium">натискання додає до підсумку</span>
+            </div>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <button type="button" onclick="quickAddFuel(1)" class="py-2.5 px-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
+                <span>+1</span>
+                <span class="text-[10px] font-normal text-amber-700 fuel-unit-label">кг</span>
+              </button>
+              <button type="button" onclick="quickAddFuel(5)" class="py-2.5 px-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
+                <span>+5</span>
+                <span class="text-[10px] font-normal text-amber-700 fuel-unit-label">кг</span>
+              </button>
+              <button type="button" onclick="quickAddFuel(10)" class="py-2.5 px-2 bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-950 rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
+                <span>+10</span>
+                <span class="text-[10px] font-normal text-amber-800 fuel-unit-label">кг</span>
+              </button>
+              <button type="button" onclick="quickAddFuel(25)" class="py-2.5 px-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
+                <span>+25</span>
+                <span class="text-[10px] font-normal text-amber-100 fuel-unit-label">кг</span>
+              </button>
+              <button type="button" onclick="quickAddFuel(50)" class="py-2.5 px-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
+                <span>+50</span>
+                <span class="text-[10px] font-normal text-amber-100 fuel-unit-label">кг</span>
+              </button>
+              <button type="button" onclick="quickAddFuel(100)" class="py-2.5 px-2 bg-slate-900 hover:bg-slate-800 text-amber-400 rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
+                <span>+100</span>
+                <span class="text-[10px] font-normal text-slate-300 fuel-unit-label">кг</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick decrements -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+              Швидке коригування (відняти / витрата):
+            </label>
+            <div class="grid grid-cols-4 gap-2">
+              <button type="button" onclick="quickAddFuel(-1)" class="py-1.5 px-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl font-mono font-semibold text-xs transition active:scale-95">
+                -1 <span class="fuel-unit-label">кг</span>
+              </button>
+              <button type="button" onclick="quickAddFuel(-5)" class="py-1.5 px-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl font-mono font-semibold text-xs transition active:scale-95">
+                -5 <span class="fuel-unit-label">кг</span>
+              </button>
+              <button type="button" onclick="quickAddFuel(-10)" class="py-1.5 px-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl font-mono font-semibold text-xs transition active:scale-95">
+                -10 <span class="fuel-unit-label">кг</span>
+              </button>
+              <button type="button" onclick="quickAddFuel(-25)" class="py-1.5 px-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl font-mono font-semibold text-xs transition active:scale-95">
+                -25 <span class="fuel-unit-label">кг</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Custom Fuel Input Form -->
+          <form id="customFuelForm" class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+            <div class="text-xs font-bold text-slate-700 mb-2">Введення довільного значення або дозаправки з приміткою:</div>
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+              <div class="sm:col-span-4">
+                <div class="relative">
+                  <input type="number" step="any" id="customFuelAmount" placeholder="Кількість (напр. 38.5)" required
+                    class="w-full pl-3 pr-9 py-2 text-sm bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold">
+                  <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium fuel-unit-label">кг</span>
+                </div>
+              </div>
+              <div class="sm:col-span-5">
+                <input type="text" id="customFuelNote" placeholder="Примітка (напр. бак №1, злиття, зміна)"
+                  class="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+              </div>
+              <div class="sm:col-span-3 flex gap-1.5">
+                <button type="submit" name="action" value="add" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs py-2 px-2 rounded-xl transition shadow-sm flex items-center justify-center gap-1">
+                  <i class="fa-solid fa-plus text-[10px]"></i> Додати
+                </button>
+                <button type="button" id="subtractCustomFuelBtn" class="bg-rose-100 hover:bg-rose-200 active:scale-95 text-rose-700 font-bold text-xs py-2 px-2.5 rounded-xl transition flex items-center justify-center" title="Відняти значення">
+                  <i class="fa-solid fa-minus text-[10px]"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right: Fuel Operations Log & Real-time Balance Box -->
+        <div class="lg:col-span-5 flex flex-col bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden min-h-[260px]">
+          
+          <!-- Balance banner inside log card -->
+          <div class="p-3 bg-gradient-to-br from-slate-900 to-indigo-950 text-white flex items-center justify-between">
+            <div>
+              <div class="text-[10px] uppercase font-bold text-slate-400">Поточний баланс</div>
+              <div class="flex items-baseline gap-2">
+                <span id="logHeaderPrimary" class="text-xl font-mono font-black text-amber-400">0.00 кг</span>
+                <span id="logHeaderConverted" class="text-xs font-mono font-semibold text-slate-300">≈ 0.00 л</span>
+              </div>
+            </div>
+            <span id="fuelLogCounter" class="text-slate-300 font-mono text-[11px] bg-white/10 px-2 py-0.5 rounded-md">0 операцій</span>
+          </div>
+
+          <div class="px-3.5 py-2 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-list-check text-amber-600"></i> Журнал операцій з паливом
+            </span>
+            <span class="text-[10px] text-slate-400">Час та зміна</span>
+          </div>
+
+          <div id="fuelHistoryContainer" class="p-2 space-y-1.5 overflow-y-auto max-h-[185px] custom-scroll flex-1">
+            <!-- Dynamically populated fuel log items -->
+          </div>
+
+          <div id="fuelEmptyLog" class="p-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center flex-1">
+            <i class="fa-solid fa-gas-pump text-2xl mb-1 text-slate-300"></i>
+            Операцій з паливом ще немає.<br>Скористайтеся кнопками швидкого інкременту зверху.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TIME TRACKING SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left Input Forms Column -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- Single Entry Form -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+          <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-stopwatch text-indigo-600"></i>
+            Швидке додавання інтервалу
+          </h2>
+
+          <form id="singleEntryForm" class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="startTime" class="block text-xs font-semibold text-slate-600 mb-1">Початок (год:хв)</label>
+                <input type="time" id="startTime" required
+                  class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono">
+              </div>
+              <div>
+                <label for="endTime" class="block text-xs font-semibold text-slate-600 mb-1">Кінець (год:хв)</label>
+                <input type="time" id="endTime" required
+                  class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Категорія роботи/простою</label>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="cursor-pointer">
+                  <input type="radio" name="category" value="hot" class="peer sr-only" checked>
+                  <div class="peer-checked:border-rose-500 peer-checked:bg-rose-50 peer-checked:text-rose-700 border border-slate-200 rounded-xl p-2.5 text-center font-medium transition flex items-center justify-center gap-1.5 text-slate-700">
+                    <i class="fa-solid fa-fire text-rose-500"></i> Гарячий
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="category" value="cold" class="peer sr-only">
+                  <div class="peer-checked:border-sky-500 peer-checked:bg-sky-50 peer-checked:text-sky-700 border border-slate-200 rounded-xl p-2.5 text-center font-medium transition flex items-center justify-center gap-1.5 text-slate-700">
+                    <i class="fa-regular fa-snowflake text-sky-500"></i> Холодний
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="category" value="maneuver" class="peer sr-only">
+                  <div class="peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-700 border border-slate-200 rounded-xl p-2.5 text-center font-medium transition flex items-center justify-center gap-1.5 text-slate-700">
+                    <i class="fa-solid fa-shuffle text-amber-500"></i> Маневри
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="category" value="movement" class="peer sr-only">
+                  <div class="peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 border border-slate-200 rounded-xl p-2.5 text-center font-medium transition flex items-center justify-center gap-1.5 text-slate-700">
+                    <i class="fa-solid fa-route text-emerald-500"></i> Рух
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label for="comment" class="block text-xs font-semibold text-slate-600 mb-1">Примітка (необов'язково)</label>
+              <input type="text" id="comment" placeholder="№ колії, перегін, очікування дозволу тощо"
+                class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <div id="liveDurationHint" class="text-xs font-medium text-slate-500">
+                Тривалість: <span class="font-bold text-slate-800 font-mono">—</span>
+              </div>
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i>
+                <span>Додати інтервал</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Smart Text Parser Form -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-bolt text-amber-500"></i>
+              Розумний ввід рядків
+            </h2>
+            <span class="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">список / 1 рядок</span>
+          </div>
+
+          <p class="text-xs text-slate-500 mb-3">
+            Вставляйте рядки прямо з чату чи чернетки:<br>
+            <code class="text-slate-800 font-mono bg-slate-100 px-1 py-0.5 rounded">8:23-8:30 холодний простій</code>
+          </p>
+
+          <textarea id="smartTextInput" rows="4" placeholder="8:23-8:30 холодний простій
+8:30-8:45 гарячий простій
+8:45-8:50 ман робота
+8:50-9:40 рух"
+            class="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 custom-scroll leading-relaxed"></textarea>
+
+          <div class="flex items-center justify-between mt-3">
+            <button type="button" id="loadSampleBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+              Завантажити приклад
+            </button>
+            <button type="button" id="parseTextBtn" class="bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-semibold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5">
+              <i class="fa-solid fa-arrow-down-short-wide"></i>
+              <span>Розпізнати та додати</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Journal Column -->
+      <div class="lg:col-span-7">
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col h-full min-h-[490px]">
+          <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-table-list text-indigo-600"></i>
+                Журнал обліку періодів
+              </h2>
+              <p class="text-xs text-slate-400">Хронологічний перелік зафіксованих інтервалів</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="filterCategory" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 font-medium text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <option value="all">Усі категорії</option>
+                <option value="hot">Гарячий простій</option>
+                <option value="cold">Холодний простій</option>
+                <option value="maneuver">Маневри</option>
+                <option value="movement">Рух</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Table with custom scroll -->
+          <div class="overflow-x-auto flex-1 custom-scroll p-1">
+            <table class="w-full text-left text-xs sm:text-sm">
+              <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+                <tr>
+                  <th class="py-3 px-3 sm:px-4">#</th>
+                  <th class="py-3 px-3">Інтервал</th>
+                  <th class="py-3 px-3">Категорія</th>
+                  <th class="py-3 px-3 text-right">Хвилини</th>
+                  <th class="py-3 px-3 text-right">Год:Хв</th>
+                  <th class="py-3 px-3">Примітка</th>
+                  <th class="py-3 px-3 text-center">Дія</th>
+                </tr>
+              </thead>
+              <tbody id="entriesTableBody" class="divide-y divide-slate-100 text-slate-700">
+                <!-- Entries inserted dynamically -->
+              </tbody>
+            </table>
+
+            <!-- Empty State Container -->
+            <div id="emptyState" class="py-16 flex flex-col items-center justify-center text-center px-4">
+              <div class="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl mb-3">
+                <i class="fa-regular fa-hourglass-half"></i>
+              </div>
+              <p class="text-sm font-semibold text-slate-600">Записів часу ще немає</p>
+              <p class="text-xs text-slate-400 max-w-xs mt-1">Додайте перший інтервал через форму ліворуч або скористайтесь полем розумного вводу.</p>
+            </div>
+          </div>
+
+          <!-- Bottom Summary Bar -->
+          <div class="p-3.5 bg-slate-50 border-t border-slate-100 rounded-b-3xl flex flex-wrap items-center justify-between text-xs text-slate-600 gap-2">
+            <span id="filteredStats">Показано: 0 записів</span>
+            <div class="flex items-center gap-3 font-medium">
+              <span>Підсумок таблиці: <strong id="footerTotalMin" class="text-slate-900 font-bold">0 хв</strong> (<span id="footerTotalHm">0 год 00 хв</span>)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODALS & TOAST NOTIFICATIONS -->
+  <!-- Modal: Clear All Data -->
+  <div id="confirmClearAllModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3 text-xl">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-800 mb-1">Очистити всі дані?</h3>
+      <p class="text-xs text-slate-500 mb-5">Буде скинуто весь облік часу (всі інтервали) та історію палива. Продовжити?</p>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button id="cancelClearAllBtn" type="button" class="px-4 py-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-95 rounded-xl transition">
+          Скасувати
+        </button>
+        <button id="executeClearAllBtn" type="button" class="px-4 py-2.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 active:scale-95 rounded-xl transition shadow-sm">
+          Очистити все
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Clear Fuel Only -->
+  <div id="confirmClearFuelModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-xl">
+        <i class="fa-solid fa-gas-pump"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-800 mb-1">Скинути акумулятор палива?</h3>
+      <p class="text-xs text-slate-500 mb-5">Вся історія накопичення палива буде видалена. Журнал часу залишиться незмінним.</p>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button id="cancelClearFuelBtn" type="button" class="px-4 py-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-95 rounded-xl transition">
+          Скасувати
+        </button>
+        <button id="executeClearFuelBtn" type="button" class="px-4 py-2.5 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition shadow-sm">
+          Скинути паливо
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white text-xs sm:text-sm px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 pointer-events-none border border-slate-700">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMessage">Повідомлення</span>
+  </div>
+
+  <!-- APPLICATION LOGIC SCRIPT -->
+  <script>
+    const CATEGORIES = {
+      hot: {
+        id: 'hot',
+        name: 'Гарячий простій',
+        badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
+        icon: 'fa-solid fa-fire text-rose-500',
+        keywords: ['гарячий', 'горячий', 'гар', 'простій гарячий', 'горяч']
+      },
+      cold: {
+        id: 'cold',
+        name: 'Холодний простій',
+        badgeClass: 'bg-sky-50 text-sky-700 border-sky-200',
+        icon: 'fa-regular fa-snowflake text-sky-500',
+        keywords: ['холодний', 'холод', 'хол', 'простій холодний']
+      },
+      maneuver: {
+        id: 'maneuver',
+        name: 'Маневри',
+        badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+        icon: 'fa-solid fa-shuffle text-amber-500',
+        keywords: ['маневр', 'ман', 'маневрова', 'маневрові', 'маневри', 'ман робота', 'робота']
+      },
+      movement: {
+        id: 'movement',
+        name: 'Рух',
+        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        icon: 'fa-solid fa-route text-emerald-500',
+        keywords: ['рух', 'слідування', 'поїздка', 'перегін', 'їзда', 'ход', 'ходка']
+      }
+    };
+
+    // State
+    let records = [];
+    let fuelRecords = [];
+    let fuelUnit = 'кг'; // Default: 'кг'
+    let fuelDensity = 0.840; // Default diesel density (kg/l)
+
+    // Load from localStorage
+    try {
+      const savedTime = localStorage.getItem('rail_time_calculator_data');
+      if (savedTime) records = JSON.parse(savedTime);
+
+      const savedFuel = localStorage.getItem('rail_fuel_calculator_data');
+      if (savedFuel) fuelRecords = JSON.parse(savedFuel);
+
+      const savedUnit = localStorage.getItem('rail_fuel_unit');
+      if (savedUnit) fuelUnit = savedUnit;
+
+      const savedDensity = localStorage.getItem('rail_fuel_density');
+      if (savedDensity && !isNaN(parseFloat(savedDensity))) {
+        fuelDensity = parseFloat(savedDensity);
+      }
+    } catch (e) {
+      console.warn('Storage retrieval error', e);
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem('rail_time_calculator_data', JSON.stringify(records));
+        localStorage.setItem('rail_fuel_calculator_data', JSON.stringify(fuelRecords));
+        localStorage.setItem('rail_fuel_unit', fuelUnit);
+        localStorage.setItem('rail_fuel_density', fuelDensity.toString());
+      } catch (e) {
+        console.warn('Could not save to localStorage', e);
+      }
+    }
+
+    // Time calculations
+    function timeToMinutes(timeStr) {
+      if (!timeStr) return 0;
+      const parts = timeStr.split(':');
+      const h = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+    }
+
+    function calculateDuration(startStr, endStr) {
+      const startMin = timeToMinutes(startStr);
+      const endMin = timeToMinutes(endStr);
+      let diff = endMin - startMin;
+      if (diff < 0) {
+        diff += 24 * 60; // Crosses midnight
+      }
+      return diff;
+    }
+
+    function formatHoursMinutes(totalMinutes) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      const minStr = minutes < 10 ? '0' + minutes : minutes;
+      return `${hours} год ${minStr} хв`;
+    }
+
+    function formatTimeDisplay(timeStr) {
+      if (!timeStr) return '--:--';
+      const parts = timeStr.split(':');
+      const h = String(parseInt(parts[0], 10) || 0).padStart(2, '0');
+      const m = String(parseInt(parts[1], 10) || 0).padStart(2, '0');
+      return `${h}:${m}`;
+    }
+
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.textContent = message;
+      if (isSuccess) {
+        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+      } else {
+        toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(m) {
+        return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m];
+      });
+    }
+
+    // FUEL LOGIC & CONVERSIONS
+    function getTotalFuel() {
+      return fuelRecords.reduce((sum, item) => sum + item.amount, 0);
+    }
+
+    // Convert between kg and litres using fuelDensity
+    function getFuelEquivalents(totalAmount, unit, density) {
+      const d = (density > 0) ? density : 0.840;
+      let kgVal = 0;
+      let litVal = 0;
+
+      if (unit === 'кг') {
+        kgVal = totalAmount;
+        litVal = totalAmount / d; // Litres = kg / density
+      } else {
+        litVal = totalAmount;
+        kgVal = totalAmount * d; // kg = Litres * density
+      }
+
+      return {
+        kg: kgVal,
+        litres: litVal
+      };
+    }
+
+    function addFuelRecord(amount, note = '') {
+      if (isNaN(amount) || amount === 0) return;
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      const rec = {
+        id: 'fuel_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        amount: Math.round(amount * 100) / 100,
+        note: note.trim(),
+        time: timeStr
+      };
+
+      fuelRecords.push(rec);
+      saveState();
+      renderFuel();
+      showToast(`${amount > 0 ? '+' : ''}${amount} ${fuelUnit} зафіксовано`);
+    }
+
+    window.quickAddFuel = function(amount) {
+      addFuelRecord(amount, amount > 0 ? 'Інкремент' : 'Коригування');
+    };
+
+    window.deleteFuelRecord = function(id) {
+      fuelRecords = fuelRecords.filter(r => r.id !== id);
+      saveState();
+      renderFuel();
+      showToast('Запис палива видалено');
+    };
+
+    function undoLastFuel() {
+      if (fuelRecords.length === 0) {
+        showToast('Журнал палива порожній', false);
+        return;
+      }
+      const removed = fuelRecords.pop();
+      saveState();
+      renderFuel();
+      showToast(`Скасовано дію (${removed.amount > 0 ? '+' : ''}${removed.amount} ${fuelUnit})`);
+    }
+
+    window.setDensity = function(val) {
+      fuelDensity = parseFloat(val);
+      document.getElementById('densityInput').value = fuelDensity.toFixed(3);
+      saveState();
+      updateDensityPresetButtons();
+      renderFuel();
+      showToast(`Густину встановлено: ${fuelDensity.toFixed(3)} кг/л`);
+    };
+
+    function updateDensityPresetButtons() {
+      document.querySelectorAll('.density-preset-btn').forEach(btn => {
+        const val = parseFloat(btn.textContent);
+        if (Math.abs(val - fuelDensity) < 0.0005) {
+          btn.className = 'density-preset-btn px-1.5 py-1 bg-amber-500 text-white border border-amber-600 rounded-lg transition font-bold shadow-sm';
+        } else {
+          btn.className = 'density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium';
+        }
+      });
+    }
+
+    function updateFuelUnitUI() {
+      const litBtn = document.getElementById('unitLitresBtn');
+      const kgBtn = document.getElementById('unitKgBtn');
+      const formulaEl = document.getElementById('densityFormulaText');
+
+      if (fuelUnit === 'кг') {
+        kgBtn.className = 'px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm transition';
+        litBtn.className = 'px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition';
+        formulaEl.textContent = "Об'єм (л) = Маса (кг) / ρ";
+      } else {
+        litBtn.className = 'px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm transition';
+        kgBtn.className = 'px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition';
+        formulaEl.textContent = "Маса (кг) = Об'єм (л) × ρ";
+      }
+
+      document.querySelectorAll('.fuel-unit-label').forEach(el => {
+        el.textContent = fuelUnit;
+      });
+    }
+
+    function setFuelUnit(unit) {
+      fuelUnit = unit;
+      updateFuelUnitUI();
+      saveState();
+      renderFuel();
+    }
+
+    function renderFuel() {
+      updateFuelUnitUI();
+      const totalFuel = getTotalFuel();
+      const equivalents = getFuelEquivalents(totalFuel, fuelUnit, fuelDensity);
+
+      const formattedTotal = (Number.isInteger(totalFuel) ? totalFuel : totalFuel.toFixed(2));
+      const formattedKg = equivalents.kg.toFixed(2);
+      const formattedLitres = equivalents.litres.toFixed(2);
+
+      // Top card widget
+      const topConvertedText = fuelUnit === 'кг' 
+        ? `≈ ${formattedLitres} л (при ρ=${fuelDensity.toFixed(3)})` 
+        : `≈ ${formattedKg} кг (при ρ=${fuelDensity.toFixed(3)})`;
+
+      document.getElementById('sum-fuel-main').innerHTML = `${formattedTotal} <span class="fuel-unit-label font-bold text-sm">${fuelUnit}</span>`;
+      document.getElementById('sum-fuel-converted').textContent = topConvertedText;
+      document.getElementById('fuel-count-badge').textContent = `${fuelRecords.length} дій`;
+
+      // Log banner balance
+      if (fuelUnit === 'кг') {
+        document.getElementById('logHeaderPrimary').textContent = `${formattedTotal} кг`;
+        document.getElementById('logHeaderConverted').textContent = `≈ ${formattedLitres} л`;
+      } else {
+        document.getElementById('logHeaderPrimary').textContent = `${formattedTotal} л`;
+        document.getElementById('logHeaderConverted').textContent = `≈ ${formattedKg} кг`;
+      }
+      document.getElementById('fuelLogCounter').textContent = `${fuelRecords.length} операцій`;
+
+      // Render log list
+      const container = document.getElementById('fuelHistoryContainer');
+      const emptyLog = document.getElementById('fuelEmptyLog');
+
+      container.innerHTML = '';
+      if (fuelRecords.length === 0) {
+        emptyLog.classList.remove('hidden');
+      } else {
+        emptyLog.classList.add('hidden');
+        const reversed = [...fuelRecords].reverse();
+        reversed.forEach(item => {
+          const isPos = item.amount > 0;
+          const itemEq = getFuelEquivalents(item.amount, fuelUnit, fuelDensity);
+          const altText = fuelUnit === 'кг' 
+            ? `≈ ${(itemEq.litres > 0 ? '+' : '')}${itemEq.litres.toFixed(1)} л` 
+            : `≈ ${(itemEq.kg > 0 ? '+' : '')}${itemEq.kg.toFixed(1)} кг`;
+
+          const div = document.createElement('div');
+          div.className = 'flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200/80 text-xs hover:border-slate-300 transition';
+          div.innerHTML = `
+            <div class="flex items-center gap-2 overflow-hidden">
+              <span class="font-mono text-[10px] text-slate-400 font-semibold">${item.time}</span>
+              <span class="font-mono font-bold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">
+                ${isPos ? '+' : ''}${item.amount} ${fuelUnit}
+              </span>
+              <span class="font-mono text-[10px] text-slate-400">(${altText})</span>
+              ${item.note ? `<span class="text-slate-500 text-[11px] truncate max-w-[110px] sm:max-w-[150px]" title="${escapeHtml(item.note)}">[${escapeHtml(item.note)}]</span>` : ''}
+            </div>
+            <button onclick="deleteFuelRecord('${item.id}')" title="Видалити" class="text-slate-300 hover:text-rose-600 transition p-1 ml-2">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          `;
+          container.appendChild(div);
+        });
+      }
+    }
+
+    // TIME TRACKING RENDERING & LOGIC
+    function renderOverallTotals() {
+      const totals = { hot: 0, cold: 0, maneuver: 0, movement: 0, all: 0 };
+      records.forEach(rec => {
+        if (totals[rec.category] !== undefined) {
+          totals[rec.category] += rec.duration;
+        }
+        totals.all += rec.duration;
+      });
+
+      document.getElementById('sum-hot-min').textContent = `${totals.hot} хв`;
+      document.getElementById('sum-hot-hm').textContent = formatHoursMinutes(totals.hot);
+
+      document.getElementById('sum-cold-min').textContent = `${totals.cold} хв`;
+      document.getElementById('sum-cold-hm').textContent = formatHoursMinutes(totals.cold);
+
+      document.getElementById('sum-maneuver-min').textContent = `${totals.maneuver} хв`;
+      document.getElementById('sum-maneuver-hm').textContent = formatHoursMinutes(totals.maneuver);
+
+      document.getElementById('sum-movement-min').textContent = `${totals.movement} хв`;
+      document.getElementById('sum-movement-hm').textContent = formatHoursMinutes(totals.movement);
+
+      document.getElementById('sum-total-min').textContent = `${totals.all} хв`;
+      document.getElementById('sum-total-hm').textContent = formatHoursMinutes(totals.all);
+      document.getElementById('record-count-badge').textContent = `${records.length} інт.`;
+    }
+
+    function renderTimeTable() {
+      const filter = document.getElementById('filterCategory').value;
+      const tbody = document.getElementById('entriesTableBody');
+      const emptyState = document.getElementById('emptyState');
+
+      tbody.innerHTML = '';
+      const displayedRecords = records.filter(rec => filter === 'all' || rec.category === filter);
+
+      if (displayedRecords.length === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      let filteredSum = 0;
+      displayedRecords.forEach((rec, idx) => {
+        filteredSum += rec.duration;
+        const cat = CATEGORIES[rec.category] || CATEGORIES.hot;
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition group';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 sm:px-4 text-slate-400 font-mono text-xs">${idx + 1}</td>
+          <td class="py-2.5 px-3 font-mono font-semibold text-slate-800 whitespace-nowrap">
+            ${formatTimeDisplay(rec.start)} – ${formatTimeDisplay(rec.end)}
+          </td>
+          <td class="py-2.5 px-3 whitespace-nowrap">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${cat.badgeClass}">
+              <i class="${cat.icon} text-[10px]"></i>
+              <span>${cat.name}</span>
+            </span>
+          </td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">${rec.duration} хв</td>
+          <td class="py-2.5 px-3 text-right font-mono text-xs text-slate-500">${formatHoursMinutes(rec.duration)}</td>
+          <td class="py-2.5 px-3 text-xs text-slate-600 max-w-[150px] truncate" title="${rec.comment || ''}">
+            ${rec.comment ? `<span class="italic text-slate-600">${escapeHtml(rec.comment)}</span>` : '<span class="text-slate-300">—</span>'}
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <button onclick="deleteRecord('${rec.id}')" title="Видалити" class="text-slate-300 hover:text-rose-600 active:scale-95 transition p-1 rounded">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('filteredStats').textContent = `Показано: ${displayedRecords.length} з ${records.length} записів`;
+      document.getElementById('footerTotalMin').textContent = `${filteredSum} хв`;
+      document.getElementById('footerTotalHm').textContent = formatHoursMinutes(filteredSum);
+    }
+
+    function addRecord(startTime, endTime, category, comment = '') {
+      const duration = calculateDuration(startTime, endTime);
+      const newRec = {
+        id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        start: startTime,
+        end: endTime,
+        duration: duration,
+        category: category,
+        comment: comment.trim()
+      };
+      records.push(newRec);
+      saveState();
+      renderOverallTotals();
+      renderTimeTable();
+      return newRec;
+    }
+
+    window.deleteRecord = function(id) {
+      records = records.filter(r => r.id !== id);
+      saveState();
+      renderOverallTotals();
+      renderTimeTable();
+      showToast('Період часу видалено');
+    };
+
+    function detectCategoryFromText(text) {
+      const lower = text.toLowerCase();
+      for (const catKey of ['cold', 'hot', 'maneuver', 'movement']) {
+        const cat = CATEGORIES[catKey];
+        for (const kw of cat.keywords) {
+          if (lower.includes(kw)) {
+            return catKey;
+          }
+        }
+      }
+      return 'hot';
+    }
+
+    function parseTextLines(text) {
+      const lines = text.split('\n');
+      let countAdded = 0;
+      const timeRangeRegex = /(\d{1,2}[:.]\d{2})\s*[-—–toдо]\s*(\d{1,2}[:.]\d{2})(.*)/i;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+
+        const match = trimmed.match(timeRangeRegex);
+        if (match) {
+          let start = match[1].replace('.', ':');
+          let end = match[2].replace('.', ':');
+          let rest = (match[3] || '').trim();
+
+          const normTime = (t) => {
+            const [h, m] = t.split(':');
+            return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
+          };
+
+          start = normTime(start);
+          end = normTime(end);
+
+          const category = detectCategoryFromText(rest);
+
+          let cleanComment = rest;
+          CATEGORIES[category].keywords.forEach(kw => {
+            const re = new RegExp(kw, 'gi');
+            cleanComment = cleanComment.replace(re, '');
+          });
+          cleanComment = cleanComment.replace(/^[,\-–—.\s]+|[,\-–—.\s]+$/g, '').trim();
+
+          addRecord(start, end, category, cleanComment);
+          countAdded++;
+        }
+      });
+      return countAdded;
+    }
+
+    // MODAL WINDOW HANDLERS
+    function openModal(el) {
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    }
+    function closeModal(el) {
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+
+    // Density input listener
+    const densityInput = document.getElementById('densityInput');
+    densityInput.addEventListener('input', () => {
+      const val = parseFloat(densityInput.value);
+      if (!isNaN(val) && val > 0.1 && val < 2.5) {
+        fuelDensity = val;
+        saveState();
+        updateDensityPresetButtons();
+        renderFuel();
+      }
+    });
+
+    // Custom Fuel form handlers
+    const customFuelForm = document.getElementById('customFuelForm');
+    const customFuelAmount = document.getElementById('customFuelAmount');
+    const customFuelNote = document.getElementById('customFuelNote');
+    const subtractCustomFuelBtn = document.getElementById('subtractCustomFuelBtn');
+
+    customFuelForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = parseFloat(customFuelAmount.value);
+      if (!val || isNaN(val)) {
+        showToast('Введіть коректне число', false);
+        return;
+      }
+      addFuelRecord(Math.abs(val), customFuelNote.value);
+      customFuelAmount.value = '';
+      customFuelNote.value = '';
+    });
+
+    subtractCustomFuelBtn.addEventListener('click', () => {
+      const val = parseFloat(customFuelAmount.value);
+      if (!val || isNaN(val)) {
+        showToast('Вкажіть число для віднімання', false);
+        return;
+      }
+      addFuelRecord(-Math.abs(val), customFuelNote.value || 'Витрата/коригування');
+      customFuelAmount.value = '';
+      customFuelNote.value = '';
+    });
+
+    document.getElementById('undoLastFuelBtn').addEventListener('click', undoLastFuel);
+    document.getElementById('unitKgBtn').addEventListener('click', () => setFuelUnit('кг'));
+    document.getElementById('unitLitresBtn').addEventListener('click', () => setFuelUnit('л'));
+
+    // Time entry form listeners
+    const singleEntryForm = document.getElementById('singleEntryForm');
+    const startInput = document.getElementById('startTime');
+    const endInput = document.getElementById('endTime');
+    const liveDurationHint = document.getElementById('liveDurationHint');
+
+    function updateLiveDuration() {
+      if (startInput.value && endInput.value) {
+        const d = calculateDuration(startInput.value, endInput.value);
+        liveDurationHint.innerHTML = `Тривалість: <span class="font-bold text-indigo-600 font-mono">${d} хв</span> (${formatHoursMinutes(d)})`;
+      } else {
+        liveDurationHint.innerHTML = `Тривалість: <span class="font-bold text-slate-800 font-mono">—</span>`;
+      }
+    }
+
+    startInput.addEventListener('input', updateLiveDuration);
+    endInput.addEventListener('input', updateLiveDuration);
+
+    singleEntryForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const start = startInput.value;
+      const end = endInput.value;
+      const cat = document.querySelector('input[name="category"]:checked')?.value || 'hot';
+      const comment = document.getElementById('comment').value;
+
+      if (!start || !end) {
+        showToast('Вкажіть початок та кінець інтервалу', false);
+        return;
+      }
+
+      addRecord(start, end, cat, comment);
+      showToast('Інтервал успішно додано');
+
+      // Auto chain start to end
+      startInput.value = end;
+      endInput.value = '';
+      document.getElementById('comment').value = '';
+      updateLiveDuration();
+      endInput.focus();
+    });
+
+    // Smart Text Input Handlers
+    document.getElementById('parseTextBtn').addEventListener('click', () => {
+      const ta = document.getElementById('smartTextInput');
+      const val = ta.value.trim();
+      if (!val) {
+        showToast('Введіть або вставте рядки з інтервалами', false);
+        return;
+      }
+      const added = parseTextLines(val);
+      if (added > 0) {
+        showToast(`Додано інтервалів: ${added}`);
+        ta.value = '';
+      } else {
+        showToast('Не знайдено інтервалів у форматі (наприклад 8:23-8:30)', false);
+      }
+    });
+
+    document.getElementById('loadSampleBtn').addEventListener('click', () => {
+      document.getElementById('smartTextInput').value = `8:23-8:30 холодний простій
+8:30-8:45 гарячий простій (прогрів двигуна)
+8:45-8:50 ман робота
+8:50-9:40 рух перегін
+9:40-10:15 гарячий простій очікування відправлення`;
+    });
+
+    // Full Report Generator and Copier
+    document.getElementById('copySummaryBtn').addEventListener('click', () => {
+      if (records.length === 0 && fuelRecords.length === 0) {
+        showToast('Немає даних для формування звіту', false);
+        return;
+      }
+
+      const totals = { hot: 0, cold: 0, maneuver: 0, movement: 0, all: 0 };
+      records.forEach(r => {
+        if (totals[r.category] !== undefined) totals[r.category] += r.duration;
+        totals.all += r.duration;
+      });
+
+      const totalFuel = getTotalFuel();
+      const equivalents = getFuelEquivalents(totalFuel, fuelUnit, fuelDensity);
+
+      let report = `📋 ЗВІТ РОБОТИ ТА ПАЛИВА\n`;
+      report += `====================================\n`;
+      report += `⏱️ ОБЛІК ЧАСУ:\n`;
+      report += `🔥 Гарячий простій:   ${totals.hot} хв (${formatHoursMinutes(totals.hot)})\n`;
+      report += `❄️ Холодний простій:  ${totals.cold} хв (${formatHoursMinutes(totals.cold)})\n`;
+      report += `🔀 Маневрова робота:  ${totals.maneuver} хв (${formatHoursMinutes(totals.maneuver)})\n`;
+      report += `🛤️ Рух:               ${totals.movement} хв (${formatHoursMinutes(totals.movement)})\n`;
+      report += `------------------------------------\n`;
+      report += `⏳ ВСЬОГО ЧАСУ:       ${totals.all} хв (${formatHoursMinutes(totals.all)})\n`;
+      report += `====================================\n`;
+      report += `⛽ АКУМУЛЯТОР ПАЛИВА:\n`;
+      report += `Густина (питома вага): ${fuelDensity.toFixed(3)} кг/л\n`;
+      report += `Маса:   ${equivalents.kg.toFixed(2)} кг\n`;
+      report += `Об'єм:  ${equivalents.litres.toFixed(2)} л\n`;
+      report += `Всього дій у журналі:  ${fuelRecords.length}\n`;
+
+      if (fuelRecords.length > 0) {
+        report += `Операції: ` + fuelRecords.map(f => `${f.amount > 0 ? '+' : ''}${f.amount}${fuelUnit}${f.note ? ' [' + f.note + ']' : ''}`).join(', ') + `\n`;
+      }
+      report += `====================================\n\n`;
+
+      if (records.length > 0) {
+        report += `Деталізація часу (${records.length} інтервалів):\n`;
+        records.forEach((r, idx) => {
+          const catName = CATEGORIES[r.category]?.name || r.category;
+          const comment = r.comment ? ` [${r.comment}]` : '';
+          report += `${idx + 1}. ${formatTimeDisplay(r.start)}-${formatTimeDisplay(r.end)}: ${r.duration} хв — ${catName}${comment}\n`;
+        });
+      }
+
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = report;
+      tempTextArea.style.position = 'fixed';
+      tempTextArea.style.left = '-9999px';
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Повний звіт скопійовано в буфер!');
+      } catch (err) {
+        showToast('Не вдалося скопіювати звіт', false);
+      }
+      document.body.removeChild(tempTextArea);
+    });
+
+    // Clear Fuel Modal
+    const confirmClearFuelModal = document.getElementById('confirmClearFuelModal');
+    document.getElementById('clearFuelBtn').addEventListener('click', () => {
+      if (fuelRecords.length === 0) {
+        showToast('Паливний журнал вже порожній');
+        return;
+      }
+      openModal(confirmClearFuelModal);
+    });
+    document.getElementById('cancelClearFuelBtn').addEventListener('click', () => closeModal(confirmClearFuelModal));
+    document.getElementById('executeClearFuelBtn').addEventListener('click', () => {
+      fuelRecords = [];
+      saveState();
+      renderFuel();
+      closeModal(confirmClearFuelModal);
+      showToast('Акумулятор палива очищено');
+    });
+
+    // Clear All Modal
+    const confirmClearAllModal = document.getElementById('confirmClearAllModal');
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      if (records.length === 0 && fuelRecords.length === 0) {
+        showToast('Журнал вже порожній');
+        return;
+      }
+      openModal(confirmClearAllModal);
+    });
+    document.getElementById('cancelClearAllBtn').addEventListener('click', () => closeModal(confirmClearAllModal));
+    document.getElementById('executeClearAllBtn').addEventListener('click', () => {
+      records = [];
+      fuelRecords = [];
+      saveState();
+      renderOverallTotals();
+      renderTimeTable();
+      renderFuel();
+      closeModal(confirmClearAllModal);
+      showToast('Усі дані скинуто до нуля');
+    });
+
+    document.getElementById('filterCategory').addEventListener('change', renderTimeTable);
+
+    // Initial setup on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const now = new Date();
+      const currentH = String(now.getHours()).padStart(2, '0');
+      const currentM = String(now.getMinutes()).padStart(2, '0');
+      startInput.value = `${currentH}:${currentM}`;
+
+      document.getElementById('densityInput').value = fuelDensity.toFixed(3);
+      updateDensityPresetButtons();
+      updateFuelUnitUI();
+      renderFuel();
+      renderOverallTotals();
+      renderTimeTable();
+    });
+  </script>
+</body>
+</html>
