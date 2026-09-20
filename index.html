@@ -68,7 +68,34 @@
 
   <main class="max-w-7xl mx-auto px-3 sm:px-6 pt-5 space-y-6">
 
-    <!-- Top Summary Statistics Cards -->
+    <!-- Tab Navigation Header -->
+    <div class="flex items-center justify-between border-b border-slate-200/80 pb-3 gap-3 flex-wrap">
+      <nav class="flex items-center gap-1.5 sm:gap-2 p-1.5 bg-slate-200/70 rounded-2xl" aria-label="Вкладки">
+        <button id="navTabShift" type="button" onclick="switchMainTab('shift')"
+          class="flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-sm bg-white text-indigo-950">
+          <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i>
+          <span>Облік зміни та часу</span>
+        </button>
+        <button id="navTabRoute" type="button" onclick="switchMainTab('route')"
+          class="flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <i class="fa-solid fa-route text-amber-600"></i>
+          <span>Витрата на перегоні</span>
+          <span class="inline-flex text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-md">Нове</span>
+        </button>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <div class="hidden sm:flex items-center gap-2 text-xs font-mono text-slate-600 bg-white px-3 py-2 rounded-xl border border-slate-200/80 shadow-xs">
+          <span class="text-slate-400">Густина палива:</span>
+          <span id="tabDensityBadge" class="font-bold text-amber-700">0.840 кг/л</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: SHIFT & TIME TRACKING -->
+    <div id="tabContentShift" class="space-y-6">
+
+      <!-- Top Summary Statistics Cards -->
     <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       <!-- Hot Standby Card -->
       <div class="bg-white rounded-2xl p-3.5 border border-rose-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
@@ -526,6 +553,394 @@
       </div>
 
     </div>
+    </div>
+    <!-- END TAB 1 -->
+
+    <!-- TAB 2: ROUTE SECTION FUEL CALCULATOR -->
+    <div id="tabContentRoute" class="space-y-6 hidden">
+
+      <!-- Top Section Banner -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-md border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-2xl shadow-inner shrink-0">
+            <i class="fa-solid fa-route"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="text-base sm:text-lg font-bold tracking-tight">Розрахунок витрати палива на перегоні</h2>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
+                rf1 ≤ lw ≤ rf2
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 mt-0.5">Визначення витрати дизельного пального на перевізну роботу методом лінійної інтерполяції питомої норми за вагою поїзда</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-start md:self-auto">
+          <button type="button" id="routeLoadSampleBtn" class="px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition flex items-center gap-1.5 font-medium shadow-xs active:scale-95">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Приклад</span>
+          </button>
+          <button type="button" id="routeClearFieldsBtn" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-rose-600/80 text-slate-300 hover:text-white rounded-xl transition flex items-center gap-1.5 font-medium border border-slate-700 active:scale-95">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Скинути</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Layout Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Inputs Form & Constraint Check (7 cols) -->
+        <div class="lg:col-span-7 space-y-5">
+
+          <!-- Inputs Card -->
+          <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-5">
+            <div>
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 mb-1">
+                <i class="fa-solid fa-sliders text-amber-500"></i>
+                Вхідні параметри ділянки та поїзда
+              </h3>
+              <p class="text-xs text-slate-500">Заповніть еталонні норми з тягового паспорта та фактичні параметри рейсу</p>
+            </div>
+
+            <!-- Group 1: Reference Norms (rf1, rf2, rsw1, rsw2) -->
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <i class="fa-solid fa-book-bookmark text-indigo-600"></i> 1. Еталонні межі норми (паспортні дані)
+                </span>
+                <span class="text-[11px] text-slate-400 font-mono">інтервал ваги</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- rf1 -->
+                <div>
+                  <label for="route_rf1" class="block text-xs font-semibold text-slate-600 mb-1">
+                    Еталонна вага 1 (<span class="font-mono font-bold text-indigo-700">rf1</span>)
+                  </label>
+                  <div class="relative">
+                    <input type="number" id="route_rf1" step="any" min="0" placeholder="2000"
+                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">т</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">нижня межа еталонної ваги</span>
+                </div>
+
+                <!-- rf2 -->
+                <div>
+                  <label for="route_rf2" class="block text-xs font-semibold text-slate-600 mb-1">
+                    Еталонна вага 2 (<span class="font-mono font-bold text-indigo-700">rf2</span>)
+                  </label>
+                  <div class="relative">
+                    <input type="number" id="route_rf2" step="any" min="0" placeholder="3000"
+                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">т</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">верхня межа еталонної ваги</span>
+                </div>
+
+                <!-- rsw1 -->
+                <div>
+                  <label for="route_rsw1" class="block text-xs font-semibold text-slate-600 mb-1">
+                    Питома норма 1 (<span class="font-mono font-bold text-amber-700">rsw1</span>)
+                  </label>
+                  <div class="relative">
+                    <input type="number" id="route_rsw1" step="any" min="0" placeholder="50.0"
+                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">кг</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">норма для ваги rf1 (кг / 10⁴ т·км)</span>
+                </div>
+
+                <!-- rsw2 -->
+                <div>
+                  <label for="route_rsw2" class="block text-xs font-semibold text-slate-600 mb-1">
+                    Питома норма 2 (<span class="font-mono font-bold text-amber-700">rsw2</span>)
+                  </label>
+                  <div class="relative">
+                    <input type="number" id="route_rsw2" step="any" min="0" placeholder="40.0"
+                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">кг</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">норма для ваги rf2 (кг / 10⁴ т·км)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Group 2: Actual Trip Parameters (lw, rl) -->
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <i class="fa-solid fa-train text-emerald-600"></i> 2. Фактичні параметри поїзда та ділянки
+                </span>
+                <span class="text-[11px] text-slate-400 font-mono">фактичний рейс</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- lw -->
+                <div>
+                  <label for="route_lw" class="block text-xs font-semibold text-slate-600 mb-1">
+                    Фактична вага (<span class="font-mono font-bold text-emerald-700">lw</span>)
+                  </label>
+                  <div class="relative">
+                    <input type="number" id="route_lw" step="any" min="0" placeholder="2500"
+                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">т</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">фактична маса поїзда / локомотива</span>
+                </div>
+
+                <!-- rl -->
+                <div>
+                  <label for="route_rl" class="block text-xs font-semibold text-slate-600 mb-1">
+                    Довжина ділянки (<span class="font-mono font-bold text-emerald-700">rl</span>)
+                  </label>
+                  <div class="relative">
+                    <input type="number" id="route_rl" step="any" min="0" placeholder="100"
+                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">км</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">довжина маршруту / перегону</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Constraint Check Card: Interactive Visual Progress Bar -->
+            <div id="routeConstraintCard" class="p-4 rounded-2xl border transition-all duration-200 bg-emerald-50/60 border-emerald-200">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span id="routeConstraintIcon" class="w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                    <i class="fa-solid fa-check"></i>
+                  </span>
+                  <span class="text-xs font-bold text-slate-800">Перевірка обмеження:</span>
+                  <code class="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-800">rf1 ≤ lw ≤ rf2</code>
+                </div>
+                <span id="routeConstraintStatusBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  В межах діапазону
+                </span>
+              </div>
+
+              <!-- Visual progress track -->
+              <div class="relative pt-2 pb-1">
+                <div class="h-3 w-full bg-slate-200 rounded-full overflow-hidden relative">
+                  <div id="routeConstraintProgress" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 50%;"></div>
+                </div>
+                <div class="flex justify-between items-center text-[11px] font-mono text-slate-500 mt-1.5">
+                  <span id="routeBarMinLabel">rf1: 2000 т</span>
+                  <span id="routeBarCurrentLabel" class="font-bold text-slate-800">lw: 2500 т (50%)</span>
+                  <span id="routeBarMaxLabel">rf2: 3000 т</span>
+                </div>
+              </div>
+
+              <!-- Alert message if constraint violated -->
+              <div id="routeConstraintError" class="hidden mt-2 p-3 rounded-xl bg-rose-100/90 border border-rose-300 text-rose-800 text-xs flex items-center gap-2.5 font-medium">
+                <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base shrink-0"></i>
+                <span id="routeConstraintErrorText">Помилка: вага lw повинна бути між rf1 та rf2!</span>
+              </div>
+            </div>
+
+            <!-- Group 3: Train Composition / Empty Carts Interpolation -->
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <i class="fa-solid fa-boxes-stacked text-amber-600"></i> 3. Склад поїзда (інтерполяція порожніх вагонів)
+                </span>
+                <span id="routeCartRatioBadge" class="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">
+                  k = 1.000 (0% порожніх)
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- total_carts -->
+                <div>
+                  <label for="route_tc" class="block text-xs font-semibold text-slate-600 mb-1">
+                    Всього вагонів (<span class="font-mono font-bold text-amber-800">total_carts / tc</span>)
+                  </label>
+                  <div class="relative">
+                    <input type="number" id="route_tc" step="1" min="0" placeholder="50"
+                      class="w-full pl-3 pr-12 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">ваг</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">загальна кількість вагонів у складі</span>
+                </div>
+
+                <!-- empty_carts -->
+                <div>
+                  <label for="route_ec" class="block text-xs font-semibold text-slate-600 mb-1">
+                    Порожніх вагонів (<span class="font-mono font-bold text-amber-800">empty_carts / ec</span>)
+                  </label>
+                  <div class="relative">
+                    <input type="number" id="route_ec" step="1" min="0" placeholder="0"
+                      class="w-full pl-3 pr-12 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">ваг</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">кількість порожніх вагонів (ec ≤ tc)</span>
+                </div>
+              </div>
+
+              <!-- Cart constraint error alert -->
+              <div id="routeCartError" class="hidden p-3 rounded-xl bg-rose-100/90 border border-rose-300 text-rose-800 text-xs flex items-center gap-2.5 font-medium">
+                <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base shrink-0"></i>
+                <span id="routeCartErrorText">Помилка: кількість порожніх вагонів (ec) не може перевищувати загальну кількість (tc)!</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Right Column: Result Card, Step-by-step breakdown & Actions (5 cols) -->
+        <div class="lg:col-span-5 space-y-5">
+
+          <!-- Primary Fuel Amount Card -->
+          <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-800 relative overflow-hidden flex flex-col justify-between min-h-[300px]">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-gas-pump"></i> Витрата палива на ділянці
+              </span>
+              <span id="routeResultBadge" class="text-[11px] bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 rounded-lg font-mono">
+                Розраховано
+              </span>
+            </div>
+
+            <!-- Big number display -->
+            <div class="my-4">
+              <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Розрахована маса палива (fuel_amount):</div>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span id="routeResultKg" class="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">0.00</span>
+                <span class="text-xl sm:text-2xl font-bold text-amber-400">кг</span>
+              </div>
+              <div class="mt-2 flex items-center gap-2 flex-wrap">
+                <span class="text-xs text-slate-300">Об'ємний еквівалент:</span>
+                <span id="routeResultLitres" class="text-sm font-bold font-mono text-emerald-400">≈ 0.00 л</span>
+                <span id="routeResultDensityHint" class="text-[11px] text-slate-400 font-mono">(при ρ=0.840 кг/л)</span>
+              </div>
+              <div id="routeBaseFuelHint" class="mt-2 text-xs text-amber-200/90 font-mono hidden flex items-center gap-1.5 flex-wrap">
+                <span>Базова: <strong id="routeResultBaseKg">0.00</strong> кг</span>
+                <span class="text-amber-300">• коєфіцієнт вагонів: ×<strong id="routeResultKVal">1.000</strong></span>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="space-y-2 pt-2 border-t border-slate-800/80">
+              <button type="button" id="routeAddToAccumulatorBtn" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 text-slate-950 font-bold text-xs sm:text-sm py-2.5 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus-circle text-base"></i>
+                <span>Додати до акумулятора палива</span>
+              </button>
+
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" id="routeCopyResultBtn" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white font-semibold text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 border border-slate-700">
+                  <i class="fa-regular fa-copy"></i>
+                  <span>Копіювати</span>
+                </button>
+                <button type="button" id="routeSaveToHistoryBtn" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white font-semibold text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 border border-slate-700">
+                  <i class="fa-regular fa-bookmark"></i>
+                  <span>Зберегти рейс</span>
+                </button>
+              </div>
+            </div>
+
+            <i class="fa-solid fa-train absolute -right-3 -bottom-3 text-white/5 text-8xl pointer-events-none"></i>
+          </div>
+
+          <!-- Calculation Physics Breakdown Card -->
+          <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-square-root-variable text-indigo-600"></i>
+              Покроковий розбір розрахунку
+            </h4>
+
+            <div class="space-y-2 text-xs">
+              <!-- Step 1: Work -->
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <div class="flex items-center justify-between text-slate-500 mb-1">
+                  <span class="font-semibold">1. Перевізна робота (W):</span>
+                  <span class="font-mono text-[11px]">lw × rl / 10000</span>
+                </div>
+                <div class="flex items-baseline justify-between font-mono">
+                  <span id="routeStepWorkFormula" class="text-slate-600 text-[11px]">—</span>
+                  <span id="routeStepWorkResult" class="font-bold text-slate-900">0.00 <span class="text-[10px] text-slate-500 font-normal">10⁴ т·км</span></span>
+                </div>
+              </div>
+
+              <!-- Step 2: Interpolated Specific Consumption -->
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <div class="flex items-center justify-between text-slate-500 mb-1">
+                  <span class="font-semibold">2. Інтерпольована норма (b):</span>
+                  <span class="font-mono text-[11px]">rsw1 + Δrsw/Δrf × (lw - rf1)</span>
+                </div>
+                <div class="flex items-baseline justify-between font-mono">
+                  <span id="routeStepNormFormula" class="text-slate-600 text-[11px]">—</span>
+                  <span id="routeStepNormResult" class="font-bold text-amber-700">0.00 <span class="text-[10px] text-slate-500 font-normal">кг/10⁴ т·км</span></span>
+                </div>
+              </div>
+
+              <!-- Step 3: Base Fuel -->
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <div class="flex items-center justify-between text-slate-500 mb-1">
+                  <span class="font-semibold">3. Базова витрата (Bбаз):</span>
+                  <span class="font-mono text-[11px]">W × b</span>
+                </div>
+                <div class="flex items-baseline justify-between font-mono">
+                  <span id="routeStepBaseFormula" class="text-slate-600 text-[11px]">—</span>
+                  <span id="routeStepBaseResult" class="font-bold text-slate-800">0.00 <span class="text-[10px] text-slate-500 font-normal">кг</span></span>
+                </div>
+              </div>
+
+              <!-- Step 4: Empty Carts Coefficient -->
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <div class="flex items-center justify-between text-slate-500 mb-1">
+                  <span class="font-semibold">4. Коеф. порожніх вагонів (k):</span>
+                  <span class="font-mono text-[11px]">1 + (1.2 - 1) × (ec / tc)</span>
+                </div>
+                <div class="flex items-baseline justify-between font-mono">
+                  <span id="routeStepCartsFormula" class="text-slate-600 text-[11px]">—</span>
+                  <span id="routeStepCartsResult" class="font-bold text-amber-700">1.000 <span class="text-[10px] text-slate-500 font-normal">(+0%)</span></span>
+                </div>
+              </div>
+
+              <!-- Step 5: Final Total Fuel -->
+              <div class="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100">
+                <div class="flex items-center justify-between text-indigo-900 mb-1">
+                  <span class="font-semibold">5. Підсумкова витрата (fuel_amount):</span>
+                  <span class="font-mono text-[11px]">Bбаз × k</span>
+                </div>
+                <div class="flex items-baseline justify-between font-mono">
+                  <span id="routeStepTotalFormula" class="text-indigo-700 text-[11px]">—</span>
+                  <span id="routeStepTotalResult" class="font-black text-indigo-950 text-sm">0.00 <span class="text-xs text-indigo-700 font-bold">кг</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Saved Route Calculations History Card -->
+          <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-amber-600 text-sm"></i>
+                <h4 class="text-xs font-bold text-slate-800">Історія збережених розрахунків</h4>
+              </div>
+              <button type="button" id="routeClearHistoryBtn" class="text-[11px] text-slate-400 hover:text-rose-600 transition">
+                Очистити
+              </button>
+            </div>
+
+            <div id="routeHistoryList" class="space-y-1.5 max-h-[160px] overflow-y-auto custom-scroll text-xs">
+              <!-- Dynamically populated route history items -->
+            </div>
+
+            <div id="routeEmptyHistory" class="py-4 text-center text-slate-400 text-xs">
+              Збережених ділянок ще немає.<br>Натисніть «Зберегти рейс» або «Додати до акумулятора».
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+    <!-- END TAB 2 -->
 
   </main>
 
@@ -776,6 +1191,8 @@
       saveState();
       updateDensityPresetButtons();
       renderFuel();
+      updateTabDensityBadge();
+      if (typeof calculateRouteFuel === 'function') calculateRouteFuel();
       showToast(`Густину встановлено: ${fuelDensity.toFixed(3)} кг/л`);
     };
 
@@ -1056,6 +1473,8 @@
         saveState();
         updateDensityPresetButtons();
         renderFuel();
+        updateTabDensityBadge();
+        if (typeof calculateRouteFuel === 'function') calculateRouteFuel();
       }
     });
 
@@ -1160,6 +1579,15 @@
 
     // Full Report Generator and Copier
     document.getElementById('copySummaryBtn').addEventListener('click', () => {
+      const activeTab = localStorage.getItem('rail_active_tab');
+      if (activeTab === 'route') {
+        const routeCopyBtn = document.getElementById('routeCopyResultBtn');
+        if (routeCopyBtn) {
+          routeCopyBtn.click();
+          return;
+        }
+      }
+
       if (records.length === 0 && fuelRecords.length === 0) {
         showToast('Немає даних для формування звіту', false);
         return;
@@ -1260,6 +1688,536 @@
 
     document.getElementById('filterCategory').addEventListener('change', renderTimeTable);
 
+    // TAB SWITCHING LOGIC
+    function switchMainTab(tabId) {
+      const navShift = document.getElementById('navTabShift');
+      const navRoute = document.getElementById('navTabRoute');
+      const contentShift = document.getElementById('tabContentShift');
+      const contentRoute = document.getElementById('tabContentRoute');
+
+      if (!navShift || !navRoute || !contentShift || !contentRoute) return;
+
+      if (tabId === 'route') {
+        navRoute.className = 'flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-sm bg-white text-indigo-950';
+        navShift.className = 'flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-white/60';
+        contentShift.classList.add('hidden');
+        contentRoute.classList.remove('hidden');
+        calculateRouteFuel();
+      } else {
+        navShift.className = 'flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-sm bg-white text-indigo-950';
+        navRoute.className = 'flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-600 hover:text-slate-900 hover:bg-white/60';
+        contentRoute.classList.add('hidden');
+        contentShift.classList.remove('hidden');
+      }
+
+      try {
+        localStorage.setItem('rail_active_tab', tabId);
+      } catch (e) {}
+    }
+    window.switchMainTab = switchMainTab;
+
+    function updateTabDensityBadge() {
+      const badge = document.getElementById('tabDensityBadge');
+      if (badge) badge.textContent = `${fuelDensity.toFixed(3)} кг/л`;
+      const hint = document.getElementById('routeResultDensityHint');
+      if (hint) hint.textContent = `(при ρ=${fuelDensity.toFixed(3)} кг/л)`;
+    }
+
+    // ROUTE SECTION FUEL CALCULATOR LOGIC
+    let routeHistory = [];
+    try {
+      const savedRouteHist = localStorage.getItem('rail_route_history');
+      if (savedRouteHist) routeHistory = JSON.parse(savedRouteHist);
+    } catch (e) {}
+
+    function saveRouteHistory() {
+      try {
+        localStorage.setItem('rail_route_history', JSON.stringify(routeHistory));
+      } catch (e) {}
+    }
+
+    function saveRouteHistoryItem(res) {
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const dateStr = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+      const item = {
+        id: 'route_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        rf1: res.rf1,
+        rf2: res.rf2,
+        rsw1: res.rsw1,
+        rsw2: res.rsw2,
+        lw: res.lw,
+        rl: res.rl,
+        tc: res.tc,
+        ec: res.ec,
+        b: res.b,
+        W: res.W,
+        baseFuelKg: res.baseFuelKg,
+        kCarts: res.kCarts,
+        fuelKg: res.fuelKg,
+        fuelLitres: res.fuelLitres,
+        density: fuelDensity,
+        time: timeStr,
+        date: dateStr
+      };
+
+      routeHistory.unshift(item);
+      if (routeHistory.length > 25) routeHistory.pop();
+      saveRouteHistory();
+      renderRouteHistory();
+    }
+
+    function renderRouteHistory() {
+      const list = document.getElementById('routeHistoryList');
+      const empty = document.getElementById('routeEmptyHistory');
+      if (!list || !empty) return;
+
+      list.innerHTML = '';
+      if (routeHistory.length === 0) {
+        empty.classList.remove('hidden');
+      } else {
+        empty.classList.add('hidden');
+        routeHistory.forEach(item => {
+          const cartInfo = item.tc > 0 ? `, ${item.tc}в/${item.ec}пор.` : '';
+          const div = document.createElement('div');
+          div.className = 'flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition';
+          div.innerHTML = `
+            <div class="flex items-center gap-2 overflow-hidden cursor-pointer flex-1" onclick="loadRouteHistoryItem('${item.id}')" title="Натисніть для завантаження параметрів">
+              <span class="font-mono text-[10px] text-slate-400 font-semibold">${item.time}</span>
+              <div class="truncate">
+                <span class="font-mono font-bold text-slate-900">${item.rl} км</span>
+                <span class="text-[11px] text-slate-500 font-mono">(${item.lw} т${cartInfo})</span>
+                <span class="font-mono font-bold text-amber-600 ml-1">→ ${item.fuelKg.toFixed(1)} кг</span>
+                <span class="text-[10px] text-slate-400 font-mono">(${item.fuelLitres.toFixed(1)} л)</span>
+              </div>
+            </div>
+            <button onclick="deleteRouteHistoryItem('${item.id}')" title="Видалити" class="text-slate-300 hover:text-rose-600 p-1 ml-1 transition">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          `;
+          list.appendChild(div);
+        });
+      }
+    }
+
+    window.loadRouteHistoryItem = function(id) {
+      const item = routeHistory.find(h => h.id === id);
+      if (!item) return;
+      document.getElementById('route_rf1').value = item.rf1;
+      document.getElementById('route_rf2').value = item.rf2;
+      document.getElementById('route_rsw1').value = item.rsw1;
+      document.getElementById('route_rsw2').value = item.rsw2;
+      document.getElementById('route_lw').value = item.lw;
+      document.getElementById('route_rl').value = item.rl;
+      document.getElementById('route_tc').value = item.tc !== undefined && item.tc > 0 ? item.tc : '';
+      document.getElementById('route_ec').value = item.ec !== undefined && item.ec >= 0 ? item.ec : '';
+      calculateRouteFuel();
+      showToast(`Завантажено дані рейсу (${item.rl} км, ${item.lw} т)`);
+    };
+
+    window.deleteRouteHistoryItem = function(id) {
+      routeHistory = routeHistory.filter(h => h.id !== id);
+      saveRouteHistory();
+      renderRouteHistory();
+      showToast('Запис ділянки видалено');
+    };
+
+    function calculateRouteFuel() {
+      const rf1El = document.getElementById('route_rf1');
+      const rf2El = document.getElementById('route_rf2');
+      const rsw1El = document.getElementById('route_rsw1');
+      const rsw2El = document.getElementById('route_rsw2');
+      const lwEl = document.getElementById('route_lw');
+      const rlEl = document.getElementById('route_rl');
+      const tcEl = document.getElementById('route_tc');
+      const ecEl = document.getElementById('route_ec');
+
+      if (!rf1El || !rf2El || !rsw1El || !rsw2El || !lwEl || !rlEl) return null;
+
+      const rf1 = parseFloat(rf1El.value);
+      const rf2 = parseFloat(rf2El.value);
+      const rsw1 = parseFloat(rsw1El.value);
+      const rsw2 = parseFloat(rsw2El.value);
+      const lw = parseFloat(lwEl.value);
+      const rl = parseFloat(rlEl.value);
+
+      const tcRaw = tcEl ? parseFloat(tcEl.value) : 0;
+      const ecRaw = ecEl ? parseFloat(ecEl.value) : 0;
+      const tc = (!isNaN(tcRaw) && tcRaw > 0) ? Math.floor(tcRaw) : 0;
+      const ec = (!isNaN(ecRaw) && ecRaw > 0) ? Math.floor(ecRaw) : 0;
+
+      const card = document.getElementById('routeConstraintCard');
+      const icon = document.getElementById('routeConstraintIcon');
+      const badge = document.getElementById('routeConstraintStatusBadge');
+      const progress = document.getElementById('routeConstraintProgress');
+      const errBox = document.getElementById('routeConstraintError');
+      const errText = document.getElementById('routeConstraintErrorText');
+      const cartErrBox = document.getElementById('routeCartError');
+      const cartErrText = document.getElementById('routeCartErrorText');
+      const cartRatioBadge = document.getElementById('routeCartRatioBadge');
+      const addBtn = document.getElementById('routeAddToAccumulatorBtn');
+      const copyBtn = document.getElementById('routeCopyResultBtn');
+      const saveBtn = document.getElementById('routeSaveToHistoryBtn');
+
+      const allFilled = !isNaN(rf1) && !isNaN(rf2) && !isNaN(rsw1) && !isNaN(rsw2) && !isNaN(lw) && !isNaN(rl);
+
+      document.getElementById('routeBarMinLabel').textContent = !isNaN(rf1) ? `rf1: ${rf1} т` : 'rf1: — т';
+      document.getElementById('routeBarMaxLabel').textContent = !isNaN(rf2) ? `rf2: ${rf2} т` : 'rf2: — т';
+
+      if (!allFilled) {
+        document.getElementById('routeBarCurrentLabel').textContent = !isNaN(lw) ? `lw: ${lw} т` : 'lw: — т';
+        progress.style.width = '0%';
+        card.className = 'p-4 rounded-2xl border transition-all duration-200 bg-slate-50 border-slate-200';
+        icon.className = 'w-6 h-6 rounded-lg bg-slate-400 text-white flex items-center justify-center text-xs font-bold shadow-xs';
+        icon.innerHTML = '<i class="fa-solid fa-minus"></i>';
+        badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700';
+        badge.textContent = 'Очікування вводу';
+        errBox.classList.add('hidden');
+        if (cartErrBox) cartErrBox.classList.add('hidden');
+
+        document.getElementById('routeResultKg').textContent = '0.00';
+        document.getElementById('routeResultLitres').textContent = '≈ 0.00 л';
+        document.getElementById('routeResultBadge').textContent = 'Очікування даних';
+        document.getElementById('routeResultBadge').className = 'text-[11px] bg-slate-700 text-slate-300 border border-slate-600 px-2.5 py-0.5 rounded-lg font-mono';
+
+        const baseHint = document.getElementById('routeBaseFuelHint');
+        if (baseHint) baseHint.classList.add('hidden');
+
+        document.getElementById('routeStepWorkFormula').textContent = '—';
+        document.getElementById('routeStepWorkResult').innerHTML = '0.00 <span class="text-[10px] text-slate-500 font-normal">10⁴ т·км</span>';
+        document.getElementById('routeStepNormFormula').textContent = '—';
+        document.getElementById('routeStepNormResult').innerHTML = '0.00 <span class="text-[10px] text-slate-500 font-normal">кг/10⁴ т·км</span>';
+        document.getElementById('routeStepBaseFormula').textContent = '—';
+        document.getElementById('routeStepBaseResult').innerHTML = '0.00 <span class="text-[10px] text-slate-500 font-normal">кг</span>';
+        document.getElementById('routeStepCartsFormula').textContent = '—';
+        document.getElementById('routeStepCartsResult').innerHTML = '1.000 <span class="text-[10px] text-slate-500 font-normal">(+0%)</span>';
+        document.getElementById('routeStepTotalFormula').textContent = '—';
+        document.getElementById('routeStepTotalResult').innerHTML = '0.00 <span class="text-xs text-indigo-700 font-bold">кг</span>';
+
+        addBtn.disabled = true;
+        addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        copyBtn.disabled = true;
+        copyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        saveBtn.disabled = true;
+        saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        return null;
+      }
+
+      // Save input parameters to localStorage
+      try {
+        localStorage.setItem('rail_route_params', JSON.stringify({ rf1, rf2, rsw1, rsw2, lw, rl, tc, ec }));
+      } catch (e) {}
+
+      // Constraint check 1: rf2 > rf1
+      if (rf2 <= rf1) {
+        card.className = 'p-4 rounded-2xl border transition-all duration-200 bg-rose-50 border-rose-200';
+        icon.className = 'w-6 h-6 rounded-lg bg-rose-500 text-white flex items-center justify-center text-xs font-bold shadow-xs';
+        icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200';
+        badge.textContent = 'Помилка меж rf1/rf2';
+        errText.textContent = `Помилка: Верхня еталонна вага rf2 (${rf2} т) має бути строго більшою за нижню rf1 (${rf1} т)!`;
+        errBox.classList.remove('hidden');
+
+        disableRouteResultState('Помилка даних');
+        return null;
+      }
+
+      // Progress bar percentage
+      let pct = ((lw - rf1) / (rf2 - rf1)) * 100;
+      let clampedPct = Math.max(0, Math.min(100, pct));
+      progress.style.width = clampedPct + '%';
+      document.getElementById('routeBarCurrentLabel').textContent = `lw: ${lw} т (${Math.round(pct)}%)`;
+
+      // Constraint check 2: rf1 <= lw <= rf2
+      const isUnder = lw < rf1;
+      const isOver = lw > rf2;
+      const isValidWeight = !isUnder && !isOver;
+
+      if (!isValidWeight) {
+        card.className = 'p-4 rounded-2xl border transition-all duration-200 bg-rose-50 border-rose-300';
+        icon.className = 'w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center text-xs font-bold shadow-xs';
+        icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+        progress.className = 'h-full bg-rose-500 rounded-full transition-all duration-300';
+        badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300';
+        badge.textContent = isUnder ? `lw < rf1 (нижче норми)` : `lw > rf2 (вище норми)`;
+
+        errText.textContent = isUnder
+          ? `Порушення обмеження: фактична вага lw (${lw} т) менша за допустиму нижню межу rf1 (${rf1} т). Діапазон: ${rf1} — ${rf2} т.`
+          : `Порушення обмеження: фактична вага lw (${lw} т) більша за допустиму верхню межу rf2 (${rf2} т). Діапазон: ${rf1} — ${rf2} т.`;
+        errBox.classList.remove('hidden');
+
+        disableRouteResultState('Поза діапазоном');
+        return null;
+      }
+
+      // Valid weight constraint state
+      card.className = 'p-4 rounded-2xl border transition-all duration-200 bg-emerald-50/70 border-emerald-300';
+      icon.className = 'w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-xs';
+      icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+      progress.className = 'h-full bg-emerald-500 rounded-full transition-all duration-300';
+      badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+      badge.textContent = 'В межах діапазону';
+      errBox.classList.add('hidden');
+
+      // Constraint check 3: Empty carts (ec <= tc)
+      if (cartErrBox && cartErrText && cartRatioBadge) {
+        if (tc > 0 && ec > tc) {
+          cartErrBox.classList.remove('hidden');
+          cartErrText.textContent = `Помилка: кількість порожніх вагонів (${ec} ваг) перевищує загальну кількість (${tc} ваг)!`;
+          cartRatioBadge.textContent = 'Помилка ec > tc';
+          cartRatioBadge.className = 'text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300';
+          disableRouteResultState('Помилка вагонів');
+          return null;
+        }
+        cartErrBox.classList.add('hidden');
+      }
+
+      // Calculate empty carts coefficient
+      // Formula: k = 1 + (1.2 - 1) * (ec / tc)
+      let kCarts = 1.0;
+      let cartsRatioPct = 0;
+      if (tc > 0) {
+        cartsRatioPct = (ec / tc) * 100;
+        kCarts = 1 + (1.2 - 1) * (ec / tc);
+        if (cartRatioBadge) {
+          cartRatioBadge.textContent = `k = ${kCarts.toFixed(3)} (${Math.round(cartsRatioPct)}% порожніх)`;
+          cartRatioBadge.className = ec > 0
+            ? 'text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300'
+            : 'text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600';
+        }
+      } else {
+        if (cartRatioBadge) {
+          cartRatioBadge.textContent = 'k = 1.000 (0% порожніх)';
+          cartRatioBadge.className = 'text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600';
+        }
+      }
+
+      // CALCULATION:
+      // 1. Specific rate linear interpolation:
+      // b = rsw1 + (rsw2 - rsw1) / (rf2 - rf1) * (lw - rf1)
+      const deltaRsw = rsw2 - rsw1;
+      const deltaRf = rf2 - rf1;
+      const b = rsw1 + (deltaRsw / deltaRf) * (lw - rf1);
+
+      // 2. Transport work W (in 10 000 t-km gross):
+      // W = lw * rl / 10000
+      const W = (lw * rl) / 10000;
+
+      // 3. Base fuel amount in kg:
+      // baseFuelKg = W * b
+      const baseFuelKg = W * b;
+
+      // 4. Final fuel amount with empty carts interpolation:
+      // fuelKg = baseFuelKg * kCarts
+      const fuelKg = baseFuelKg * kCarts;
+
+      // 5. Volume equivalent in litres:
+      const currentDensity = (fuelDensity > 0) ? fuelDensity : 0.840;
+      const fuelLitres = fuelKg / currentDensity;
+
+      // Update UI Result Numbers
+      document.getElementById('routeResultKg').textContent = fuelKg.toFixed(2);
+      document.getElementById('routeResultLitres').textContent = `≈ ${fuelLitres.toFixed(2)} л`;
+      document.getElementById('routeResultDensityHint').textContent = `(при ρ=${currentDensity.toFixed(3)} кг/л)`;
+      document.getElementById('routeResultBadge').textContent = 'Розраховано';
+      document.getElementById('routeResultBadge').className = 'text-[11px] bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 rounded-lg font-mono';
+
+      const baseHint = document.getElementById('routeBaseFuelHint');
+      if (baseHint) {
+        if (kCarts > 1.0001) {
+          document.getElementById('routeResultBaseKg').textContent = baseFuelKg.toFixed(2);
+          document.getElementById('routeResultKVal').textContent = kCarts.toFixed(3);
+          baseHint.classList.remove('hidden');
+        } else {
+          baseHint.classList.add('hidden');
+        }
+      }
+
+      // Step 1 UI (Work)
+      document.getElementById('routeStepWorkFormula').textContent = `${lw} т × ${rl} км / 10000 =`;
+      document.getElementById('routeStepWorkResult').innerHTML = `${W.toFixed(4)} <span class="text-[10px] text-slate-500 font-normal">10⁴ т·км</span>`;
+
+      // Step 2 UI (Specific Norm)
+      const deltaSign = deltaRsw >= 0 ? '+' : '–';
+      document.getElementById('routeStepNormFormula').textContent = `${rsw1} ${deltaSign} (${Math.abs(deltaRsw).toFixed(1)} / ${deltaRf}) × ${lw - rf1} =`;
+      document.getElementById('routeStepNormResult').innerHTML = `${b.toFixed(2)} <span class="text-[10px] text-slate-500 font-normal">кг/10⁴ т·км</span>`;
+
+      // Step 3 UI (Base Fuel)
+      document.getElementById('routeStepBaseFormula').textContent = `${W.toFixed(4)} × ${b.toFixed(2)} =`;
+      document.getElementById('routeStepBaseResult').innerHTML = `${baseFuelKg.toFixed(2)} <span class="text-[10px] text-slate-500 font-normal">кг</span>`;
+
+      // Step 4 UI (Carts Factor)
+      if (tc > 0) {
+        document.getElementById('routeStepCartsFormula').textContent = `1 + 0.2 × (${ec} / ${tc}) =`;
+        document.getElementById('routeStepCartsResult').innerHTML = `${kCarts.toFixed(3)} <span class="text-[10px] text-amber-700 font-normal">(+${((kCarts - 1) * 100).toFixed(1)}%)</span>`;
+      } else {
+        document.getElementById('routeStepCartsFormula').textContent = `вагони не вказано (k = 1)`;
+        document.getElementById('routeStepCartsResult').innerHTML = `1.000 <span class="text-[10px] text-slate-500 font-normal">(+0%)</span>`;
+      }
+
+      // Step 5 UI (Total Fuel)
+      if (kCarts > 1.0001) {
+        document.getElementById('routeStepTotalFormula').textContent = `${baseFuelKg.toFixed(2)} кг × ${kCarts.toFixed(3)} =`;
+      } else {
+        document.getElementById('routeStepTotalFormula').textContent = `${baseFuelKg.toFixed(2)} кг × 1.000 =`;
+      }
+      document.getElementById('routeStepTotalResult').innerHTML = `${fuelKg.toFixed(2)} <span class="text-xs text-indigo-700 font-bold">кг</span>`;
+
+      // Enable Action Buttons
+      addBtn.disabled = false;
+      addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      copyBtn.disabled = false;
+      copyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      saveBtn.disabled = false;
+      saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+      return { rf1, rf2, rsw1, rsw2, lw, rl, tc, ec, b, W, baseFuelKg, kCarts, fuelKg, fuelLitres };
+    }
+
+    function disableRouteResultState(statusText) {
+      document.getElementById('routeResultKg').textContent = '—';
+      document.getElementById('routeResultLitres').textContent = '≈ — л';
+      document.getElementById('routeResultBadge').textContent = statusText;
+      document.getElementById('routeResultBadge').className = 'text-[11px] bg-rose-900/60 text-rose-300 border border-rose-700 px-2.5 py-0.5 rounded-lg font-mono';
+
+      const baseHint = document.getElementById('routeBaseFuelHint');
+      if (baseHint) baseHint.classList.add('hidden');
+
+      document.getElementById('routeStepWorkFormula').textContent = '—';
+      document.getElementById('routeStepWorkResult').innerHTML = '— <span class="text-[10px] text-slate-500 font-normal">10⁴ т·км</span>';
+      document.getElementById('routeStepNormFormula').textContent = '—';
+      document.getElementById('routeStepNormResult').innerHTML = '— <span class="text-[10px] text-slate-500 font-normal">кг/10⁴ т·км</span>';
+      document.getElementById('routeStepBaseFormula').textContent = '—';
+      document.getElementById('routeStepBaseResult').innerHTML = '— <span class="text-[10px] text-slate-500 font-normal">кг</span>';
+      document.getElementById('routeStepCartsFormula').textContent = '—';
+      document.getElementById('routeStepCartsResult').innerHTML = '— <span class="text-[10px] text-slate-500 font-normal">(+0%)</span>';
+      document.getElementById('routeStepTotalFormula').textContent = '—';
+      document.getElementById('routeStepTotalResult').innerHTML = '— <span class="text-xs text-indigo-700 font-bold">кг</span>';
+
+      const addBtn = document.getElementById('routeAddToAccumulatorBtn');
+      const copyBtn = document.getElementById('routeCopyResultBtn');
+      const saveBtn = document.getElementById('routeSaveToHistoryBtn');
+      addBtn.disabled = true;
+      addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      copyBtn.disabled = true;
+      copyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      saveBtn.disabled = true;
+      saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
+    // Input listeners for real-time recalculation
+    ['route_rf1', 'route_rf2', 'route_rsw1', 'route_rsw2', 'route_lw', 'route_rl', 'route_tc', 'route_ec'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', calculateRouteFuel);
+    });
+
+    // Add to accumulator action
+    document.getElementById('routeAddToAccumulatorBtn').addEventListener('click', () => {
+      const res = calculateRouteFuel();
+      if (!res) {
+        showToast('Неможливо додати: перевірте обмеження та вхідні дані', false);
+        return;
+      }
+      const cartInfo = res.tc > 0 ? `, ${res.tc}ваг/${res.ec}пор.` : '';
+      const note = `Перегін ${res.rl} км (вага ${res.lw} т${cartInfo})`;
+      addFuelRecord(Math.round(res.fuelKg * 100) / 100, note);
+      saveRouteHistoryItem(res);
+      showToast(`+${res.fuelKg.toFixed(2)} кг додано до Акумулятора палива!`);
+    });
+
+    // Save to history action
+    document.getElementById('routeSaveToHistoryBtn').addEventListener('click', () => {
+      const res = calculateRouteFuel();
+      if (!res) {
+        showToast('Перевірте коректність даних перед збереженням', false);
+        return;
+      }
+      saveRouteHistoryItem(res);
+      showToast('Рейс збережено в історію ділянок');
+    });
+
+    // Copy route result action
+    document.getElementById('routeCopyResultBtn').addEventListener('click', () => {
+      const res = calculateRouteFuel();
+      if (!res) {
+        showToast('Немає розрахованих даних для копіювання', false);
+        return;
+      }
+      let report = `🛤️ РОЗРАХУНОК ВИТРАТИ ПАЛИВА НА ПЕРЕГОНІ\n`;
+      report += `====================================\n`;
+      report += `📌 ВХІДНІ ПАРАМЕТРИ:\n`;
+      report += `• Еталонні межі ваги: rf1 = ${res.rf1} т, rf2 = ${res.rf2} т\n`;
+      report += `• Еталонні норми:     rsw1 = ${res.rsw1} кг, rsw2 = ${res.rsw2} кг\n`;
+      report += `• Фактична вага:      lw = ${res.lw} т (${res.rf1} ≤ ${res.lw} ≤ ${res.rf2})\n`;
+      report += `• Довжина ділянки:    rl = ${res.rl} км\n`;
+      if (res.tc > 0) {
+        report += `• Склад поїзда:       tc = ${res.tc} ваг (з них порожніх ec = ${res.ec} ваг, ${Math.round((res.ec/res.tc)*100)}%)\n`;
+      }
+      report += `------------------------------------\n`;
+      report += `📊 ХІД РОЗРАХУНКУ:\n`;
+      report += `• Перевізна робота:   W = ${res.W.toFixed(4)} (10⁴ т·км брутто)\n`;
+      report += `• Інтерпольована норма: b = ${res.b.toFixed(2)} кг / 10⁴ т·км\n`;
+      report += `• Базова витрата:     Bбаз = ${res.baseFuelKg.toFixed(2)} кг\n`;
+      if (res.tc > 0) {
+        report += `• Коеф. порожніх вагонів: k = 1 + (1.2 - 1) × (${res.ec}/${res.tc}) = ${res.kCarts.toFixed(3)} (+${((res.kCarts - 1) * 100).toFixed(1)}%)\n`;
+      }
+      report += `====================================\n`;
+      report += `⛽ ПІДСУМКОВА ВИТРАТА ПАЛИВА (fuel_amount):\n`;
+      report += `• Маса:  ${res.fuelKg.toFixed(2)} кг\n`;
+      report += `• Об'єм: ≈ ${res.fuelLitres.toFixed(2)} л (при густині ρ = ${fuelDensity.toFixed(3)} кг/л)\n`;
+      report += `====================================\n`;
+
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = report;
+      tempTextArea.style.position = 'fixed';
+      tempTextArea.style.left = '-9999px';
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Розрахунок ділянки скопійовано!');
+      } catch (e) {
+        showToast('Не вдалося скопіювати', false);
+      }
+      document.body.removeChild(tempTextArea);
+    });
+
+    // Load sample action
+    document.getElementById('routeLoadSampleBtn').addEventListener('click', () => {
+      document.getElementById('route_rf1').value = 2000;
+      document.getElementById('route_rf2').value = 3000;
+      document.getElementById('route_rsw1').value = 50.0;
+      document.getElementById('route_rsw2').value = 40.0;
+      document.getElementById('route_lw').value = 2500;
+      document.getElementById('route_rl').value = 100;
+      document.getElementById('route_tc').value = 50;
+      document.getElementById('route_ec').value = 20;
+      calculateRouteFuel();
+      showToast('Завантажено приклад розрахунку (2500 т, 100 км, 50 ваг / 20 пор.)');
+    });
+
+    // Clear fields action
+    document.getElementById('routeClearFieldsBtn').addEventListener('click', () => {
+      ['route_rf1', 'route_rf2', 'route_rsw1', 'route_rsw2', 'route_lw', 'route_rl', 'route_tc', 'route_ec'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      try {
+        localStorage.removeItem('rail_route_params');
+      } catch (e) {}
+      calculateRouteFuel();
+      showToast('Поля ділянки очищено');
+    });
+
+    // Clear history action
+    document.getElementById('routeClearHistoryBtn').addEventListener('click', () => {
+      routeHistory = [];
+      saveRouteHistory();
+      renderRouteHistory();
+      showToast('Історію розрахунків ділянок очищено');
+    });
+
     // Initial setup on load
     window.addEventListener('DOMContentLoaded', () => {
       const now = new Date();
@@ -1273,6 +2231,44 @@
       renderFuel();
       renderOverallTotals();
       renderTimeTable();
+      updateTabDensityBadge();
+
+      // Initialize route calculator values from storage or default
+      try {
+        const savedParams = localStorage.getItem('rail_route_params');
+        if (savedParams) {
+          const parsed = JSON.parse(savedParams);
+          if (parsed.rf1 !== undefined) document.getElementById('route_rf1').value = parsed.rf1;
+          if (parsed.rf2 !== undefined) document.getElementById('route_rf2').value = parsed.rf2;
+          if (parsed.rsw1 !== undefined) document.getElementById('route_rsw1').value = parsed.rsw1;
+          if (parsed.rsw2 !== undefined) document.getElementById('route_rsw2').value = parsed.rsw2;
+          if (parsed.lw !== undefined) document.getElementById('route_lw').value = parsed.lw;
+          if (parsed.rl !== undefined) document.getElementById('route_rl').value = parsed.rl;
+          if (parsed.tc !== undefined) document.getElementById('route_tc').value = parsed.tc;
+          if (parsed.ec !== undefined) document.getElementById('route_ec').value = parsed.ec;
+        } else {
+          // Default sample values
+          document.getElementById('route_rf1').value = 2000;
+          document.getElementById('route_rf2').value = 3000;
+          document.getElementById('route_rsw1').value = 50.0;
+          document.getElementById('route_rsw2').value = 40.0;
+          document.getElementById('route_lw').value = 2500;
+          document.getElementById('route_rl').value = 100;
+          document.getElementById('route_tc').value = 50;
+          document.getElementById('route_ec').value = 20;
+        }
+      } catch (e) {}
+
+      renderRouteHistory();
+      calculateRouteFuel();
+
+      // Restore active tab
+      try {
+        const activeTab = localStorage.getItem('rail_active_tab') || 'shift';
+        switchMainTab(activeTab);
+      } catch (e) {
+        switchMainTab('shift');
+      }
     });
   </script>
 </body>
