@@ -41,24 +41,24 @@
 <body class="bg-slate-100/80 text-slate-800 min-h-screen pb-14">
 
   <!-- Header Navigation -->
-  <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white shadow-lg sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3.5 flex flex-wrap justify-between items-center gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-lg shadow-inner">
+  <header id="mainHeader" class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white shadow-lg sticky top-0 z-30 transition-transform duration-300 ease-in-out will-change-transform">
+    <div id="headerContainer" class="max-w-7xl mx-auto px-3 sm:px-6 py-3 transition-all duration-200 flex flex-wrap justify-between items-center gap-2.5 sm:gap-3">
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <div id="headerLogo" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-base sm:text-lg shadow-inner shrink-0 transition-all">
           <i class="fa-solid fa-train"></i>
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold tracking-tight">Калькулятор обліку часу та палива</h1>
-          <p class="text-[11px] text-slate-300">Гарячий/холодний простій, маневри, рух та акумулятор палива з густиною</p>
+          <h1 id="headerTitle" class="text-sm sm:text-base md:text-lg font-bold tracking-tight">Калькулятор обліку часу та палива</h1>
+          <p id="headerSubtitle" class="text-[11px] text-slate-300 transition-all duration-200">Гарячий/холодний простій, маневри, рух та акумулятор палива з густиною</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button id="copySummaryBtn" class="flex items-center gap-2 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition px-3.5 py-2 rounded-xl font-medium shadow-sm">
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="copySummaryBtn" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-medium shadow-sm">
           <i class="fa-regular fa-copy"></i>
           <span>Копіювати звіт</span>
         </button>
-        <button id="clearAllBtn" class="flex items-center gap-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-rose-600 active:scale-95 transition px-3 py-2 rounded-xl text-slate-300 hover:text-white font-medium border border-slate-700">
+        <button id="clearAllBtn" class="flex items-center gap-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-rose-600 active:scale-95 transition px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-300 hover:text-white font-medium border border-slate-700">
           <i class="fa-solid fa-trash-can"></i>
           <span>Очистити все</span>
         </button>
@@ -91,6 +91,48 @@
         </div>
       </div>
     </div>
+
+    <!-- GLOBAL FUEL PARAMETERS BAR -->
+    <section class="bg-white rounded-3xl p-3.5 sm:p-4 border border-amber-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
+          ρ
+        </div>
+        <div>
+          <div class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2 flex-wrap">
+            <span>Густина палива (глобальний параметр):</span>
+            <span id="densityFormulaText" class="text-xs text-amber-700 font-mono font-medium">Об'єм (л) = Маса (кг) / ρ</span>
+          </div>
+          <p class="text-[11px] text-slate-500">Використовується для взаємного перерахунку між вагою та об'ємом для інтервалів, акумулятора та перегонів</p>
+        </div>
+      </div>
+
+      <div class="flex items-center flex-wrap gap-2.5">
+        <!-- Global Unit Selector -->
+        <div class="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200 text-xs font-bold shadow-xs">
+          <button id="unitKgBtn" type="button" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm transition">Кг (кг)</button>
+          <button id="unitLitresBtn" type="button" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">Літри (л)</button>
+        </div>
+
+        <!-- Density input -->
+        <div class="flex items-center bg-amber-50/50 px-2.5 py-1 rounded-xl border border-amber-300 shadow-xs">
+          <span class="text-xs font-mono font-bold text-slate-600 mr-1.5">ρ =</span>
+          <input type="number" step="0.001" min="0.5" max="1.5" id="densityInput" value="0.840"
+            class="w-20 text-xs font-mono font-bold text-slate-900 focus:outline-none text-center bg-white py-0.5 rounded border border-amber-200">
+          <span class="text-[11px] font-medium text-slate-500 ml-1.5">кг/л</span>
+        </div>
+
+        <!-- Density presets -->
+        <div class="flex items-center gap-1 text-[11px] font-mono">
+          <span class="text-slate-400 text-[10px] uppercase font-bold mr-0.5 hidden sm:inline">Швидко:</span>
+          <button type="button" onclick="setDensity(0.830)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.830</button>
+          <button type="button" onclick="setDensity(0.835)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.835</button>
+          <button type="button" onclick="setDensity(0.840)" class="density-preset-btn px-1.5 py-1 bg-amber-500 text-white border border-amber-600 rounded-lg transition font-bold shadow-sm">0.840</button>
+          <button type="button" onclick="setDensity(0.845)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.845</button>
+          <button type="button" onclick="setDensity(0.850)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.850</button>
+        </div>
+      </div>
+    </section>
 
     <!-- TAB 1: SHIFT & TIME TRACKING -->
     <div id="tabContentShift" class="space-y-6">
@@ -182,12 +224,13 @@
         <div>
           <div id="sum-fuel-main" class="text-xl sm:text-2xl font-black text-white leading-tight">0 <span class="fuel-unit-label font-bold text-sm">кг</span></div>
           <div id="sum-fuel-converted" class="text-[11px] font-semibold text-amber-100 mt-0.5 font-mono">≈ 0.00 л</div>
+          <div id="sum-fuel-breakdown" class="text-[10px] text-amber-100/90 font-mono mt-1 hidden"></div>
         </div>
         <i class="fa-solid fa-gas-pump absolute -right-2 -bottom-2 text-white/15 text-5xl pointer-events-none"></i>
       </div>
     </section>
 
-    <!-- FUEL ACCUMULATOR SECTION WITH DENSITY CALCULATOR -->
+    <!-- FUEL ACCUMULATOR SECTION -->
     <section class="bg-white rounded-3xl p-4 sm:p-6 border border-amber-200 shadow-md">
       
       <!-- Top header bar of fuel section -->
@@ -201,17 +244,12 @@
               Акумулятор палива
               <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Інкрементний облік</span>
             </h2>
-            <p class="text-xs text-slate-500">Додавання по кроках, сумування та взаємний перерахунок (кг ↔ л) за густиною</p>
+            <p class="text-xs text-slate-500">Додавання по кроках, сумування та журнал операцій з паливом</p>
           </div>
         </div>
 
-        <!-- Controls: Unit selector, undo, reset -->
+        <!-- Controls: undo, reset -->
         <div class="flex items-center flex-wrap gap-2">
-          <div class="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200 text-xs font-bold">
-            <button id="unitKgBtn" type="button" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm transition">Кг (кг)</button>
-            <button id="unitLitresBtn" type="button" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">Літри (л)</button>
-          </div>
-
           <button id="undoLastFuelBtn" title="Скасувати останню дію" class="px-2.5 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center gap-1.5 font-medium border border-slate-200">
             <i class="fa-solid fa-rotate-left"></i>
             <span class="hidden sm:inline">Скасувати</span>
@@ -223,126 +261,50 @@
         </div>
       </div>
 
-      <!-- Density (Specific Gravity) Banner -->
-      <div class="mt-4 p-3.5 bg-gradient-to-r from-amber-50/70 via-orange-50/50 to-slate-50 rounded-2xl border border-amber-200/90 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-700 flex items-center justify-center font-bold text-sm">
-            ρ
-          </div>
-          <div>
-            <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              <span>Питома вага (густина палива):</span>
-              <span id="densityFormulaText" class="text-[11px] text-amber-700 font-mono font-medium">Об'єм (л) = Маса (кг) / ρ</span>
-            </div>
-            <p class="text-[11px] text-slate-500">Використовується для взаємного перерахунку між вагою та об'ємом</p>
-          </div>
-        </div>
-
-        <div class="flex items-center flex-wrap gap-2">
-          <div class="flex items-center bg-white px-2 py-1 rounded-xl border border-amber-300 shadow-sm">
-            <span class="text-xs font-mono font-bold text-slate-600 mr-1.5">ρ =</span>
-            <input type="number" step="0.001" min="0.5" max="1.5" id="densityInput" value="0.840"
-              class="w-20 text-xs font-mono font-bold text-slate-900 focus:outline-none text-center bg-amber-50/40 py-0.5 rounded">
-            <span class="text-[11px] font-medium text-slate-500 ml-1">кг/л</span>
-          </div>
-
-          <!-- Density presets -->
-          <div class="flex items-center gap-1 text-[11px] font-mono">
-            <span class="text-slate-400 text-[10px] uppercase font-bold mr-0.5">Швидко:</span>
-            <button type="button" onclick="setDensity(0.830)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.830</button>
-            <button type="button" onclick="setDensity(0.835)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.835</button>
-            <button type="button" onclick="setDensity(0.840)" class="density-preset-btn px-1.5 py-1 bg-amber-500 text-white border border-amber-600 rounded-lg transition font-bold shadow-sm">0.840</button>
-            <button type="button" onclick="setDensity(0.845)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.845</button>
-            <button type="button" onclick="setDensity(0.850)" class="density-preset-btn px-1.5 py-1 bg-white hover:bg-amber-100 border border-slate-200 rounded-lg text-slate-700 transition font-medium">0.850</button>
-          </div>
-        </div>
-      </div>
-
       <!-- Fuel controls grid -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-4">
         
-        <!-- Left: Quick increments & Custom addition -->
-        <div class="lg:col-span-7 space-y-4">
-          <!-- Increments -->
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <label class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Швидкі інкременти (додати):
-              </label>
-              <span class="text-[11px] text-amber-700 font-medium">натискання додає до підсумку</span>
+        <!-- Left: Fuel Operations Input Form (Number Input) -->
+        <div class="lg:col-span-7 flex flex-col justify-center">
+          <form id="customFuelForm" class="p-5 bg-slate-50 border border-slate-200 rounded-3xl space-y-4">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-amber-500"></i>
+                Введення операцій з паливом
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">Вкажіть точне значення палива для додавання (дозаправка, прихід) або віднімання (витрата, коригування)</p>
             </div>
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              <button type="button" onclick="quickAddFuel(1)" class="py-2.5 px-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
-                <span>+1</span>
-                <span class="text-[10px] font-normal text-amber-700 fuel-unit-label">кг</span>
-              </button>
-              <button type="button" onclick="quickAddFuel(5)" class="py-2.5 px-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
-                <span>+5</span>
-                <span class="text-[10px] font-normal text-amber-700 fuel-unit-label">кг</span>
-              </button>
-              <button type="button" onclick="quickAddFuel(10)" class="py-2.5 px-2 bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-950 rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
-                <span>+10</span>
-                <span class="text-[10px] font-normal text-amber-800 fuel-unit-label">кг</span>
-              </button>
-              <button type="button" onclick="quickAddFuel(25)" class="py-2.5 px-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
-                <span>+25</span>
-                <span class="text-[10px] font-normal text-amber-100 fuel-unit-label">кг</span>
-              </button>
-              <button type="button" onclick="quickAddFuel(50)" class="py-2.5 px-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
-                <span>+50</span>
-                <span class="text-[10px] font-normal text-amber-100 fuel-unit-label">кг</span>
-              </button>
-              <button type="button" onclick="quickAddFuel(100)" class="py-2.5 px-2 bg-slate-900 hover:bg-slate-800 text-amber-400 rounded-xl font-mono font-bold text-sm transition active:scale-95 shadow-sm flex flex-col items-center justify-center">
-                <span>+100</span>
-                <span class="text-[10px] font-normal text-slate-300 fuel-unit-label">кг</span>
-              </button>
-            </div>
-          </div>
 
-          <!-- Quick decrements -->
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-              Швидке коригування (відняти / витрата):
-            </label>
-            <div class="grid grid-cols-4 gap-2">
-              <button type="button" onclick="quickAddFuel(-1)" class="py-1.5 px-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl font-mono font-semibold text-xs transition active:scale-95">
-                -1 <span class="fuel-unit-label">кг</span>
-              </button>
-              <button type="button" onclick="quickAddFuel(-5)" class="py-1.5 px-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl font-mono font-semibold text-xs transition active:scale-95">
-                -5 <span class="fuel-unit-label">кг</span>
-              </button>
-              <button type="button" onclick="quickAddFuel(-10)" class="py-1.5 px-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl font-mono font-semibold text-xs transition active:scale-95">
-                -10 <span class="fuel-unit-label">кг</span>
-              </button>
-              <button type="button" onclick="quickAddFuel(-25)" class="py-1.5 px-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl font-mono font-semibold text-xs transition active:scale-95">
-                -25 <span class="fuel-unit-label">кг</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Custom Fuel Input Form -->
-          <form id="customFuelForm" class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-            <div class="text-xs font-bold text-slate-700 mb-2">Введення довільного значення або дозаправки з приміткою:</div>
-            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
-              <div class="sm:col-span-4">
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <div class="sm:col-span-5">
+                <label for="customFuelAmount" class="block text-xs font-semibold text-slate-600 mb-1">
+                  Кількість палива (<span class="fuel-unit-label font-bold text-amber-700">кг</span>)
+                </label>
                 <div class="relative">
-                  <input type="number" step="any" id="customFuelAmount" placeholder="Кількість (напр. 38.5)" required
-                    class="w-full pl-3 pr-9 py-2 text-sm bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold">
-                  <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium fuel-unit-label">кг</span>
+                  <input type="number" step="any" id="customFuelAmount" placeholder="напр. 38.5" required
+                    class="w-full pl-3.5 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold text-slate-900 shadow-xs">
+                  <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono fuel-unit-label">кг</span>
                 </div>
               </div>
-              <div class="sm:col-span-5">
-                <input type="text" id="customFuelNote" placeholder="Примітка (напр. бак №1, злиття, зміна)"
-                  class="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+
+              <div class="sm:col-span-7">
+                <label for="customFuelNote" class="block text-xs font-semibold text-slate-600 mb-1">
+                  Примітка до операції (необов'язково)
+                </label>
+                <input type="text" id="customFuelNote" placeholder="напр. бак №1, злиття, зміна, дозаправка"
+                  class="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs">
               </div>
-              <div class="sm:col-span-3 flex gap-1.5">
-                <button type="submit" name="action" value="add" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs py-2 px-2 rounded-xl transition shadow-sm flex items-center justify-center gap-1">
-                  <i class="fa-solid fa-plus text-[10px]"></i> Додати
-                </button>
-                <button type="button" id="subtractCustomFuelBtn" class="bg-rose-100 hover:bg-rose-200 active:scale-95 text-rose-700 font-bold text-xs py-2 px-2.5 rounded-xl transition flex items-center justify-center" title="Відняти значення">
-                  <i class="fa-solid fa-minus text-[10px]"></i>
-                </button>
-              </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 pt-1">
+              <button type="submit" name="action" value="add" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-sm py-2.5 px-4 rounded-xl transition shadow-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Додати до балансу</span>
+              </button>
+              <button type="button" id="subtractCustomFuelBtn" class="bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-700 border border-rose-200 font-bold text-sm py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-xs" title="Відняти значення від балансу">
+                <i class="fa-solid fa-minus text-xs"></i>
+                <span>Відняти</span>
+              </button>
             </div>
           </form>
         </div>
@@ -375,7 +337,7 @@
 
           <div id="fuelEmptyLog" class="p-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center flex-1">
             <i class="fa-solid fa-gas-pump text-2xl mb-1 text-slate-300"></i>
-            Операцій з паливом ще немає.<br>Скористайтеся кнопками швидкого інкременту зверху.
+            Операцій з паливом ще немає.<br>Скористайтеся формою введення палива ліворуч.
           </div>
         </div>
 
@@ -439,10 +401,22 @@
               </div>
             </div>
 
-            <div>
-              <label for="comment" class="block text-xs font-semibold text-slate-600 mb-1">Примітка (необов'язково)</label>
-              <input type="text" id="comment" placeholder="№ колії, перегін, очікування дозволу тощо"
-                class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="intervalFuel" class="block text-xs font-semibold text-slate-600 mb-1">
+                  Витрата палива (<span class="fuel-unit-label font-bold text-amber-700">кг</span>)
+                </label>
+                <div class="relative">
+                  <input type="number" step="any" min="0" id="intervalFuel" placeholder="0"
+                    class="w-full pl-3 pr-9 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono font-bold text-slate-900">
+                  <span class="absolute right-3 top-2 text-xs text-slate-400 font-medium font-mono fuel-unit-label">кг</span>
+                </div>
+              </div>
+              <div>
+                <label for="comment" class="block text-xs font-semibold text-slate-600 mb-1">Примітка (необов'язково)</label>
+                <input type="text" id="comment" placeholder="№ колії, перегін, очікування тощо"
+                  class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
             </div>
 
             <div class="flex items-center justify-between pt-1">
@@ -523,6 +497,7 @@
                   <th class="py-3 px-3">Категорія</th>
                   <th class="py-3 px-3 text-right">Хвилини</th>
                   <th class="py-3 px-3 text-right">Год:Хв</th>
+                  <th class="py-3 px-3 text-right">Паливо (<span class="fuel-unit-label">кг</span>)</th>
                   <th class="py-3 px-3">Примітка</th>
                   <th class="py-3 px-3 text-center">Дія</th>
                 </tr>
@@ -545,8 +520,10 @@
           <!-- Bottom Summary Bar -->
           <div class="p-3.5 bg-slate-50 border-t border-slate-100 rounded-b-3xl flex flex-wrap items-center justify-between text-xs text-slate-600 gap-2">
             <span id="filteredStats">Показано: 0 записів</span>
-            <div class="flex items-center gap-3 font-medium">
+            <div class="flex items-center gap-3 font-medium flex-wrap">
               <span>Підсумок таблиці: <strong id="footerTotalMin" class="text-slate-900 font-bold">0 хв</strong> (<span id="footerTotalHm">0 год 00 хв</span>)</span>
+              <span class="text-slate-300 hidden sm:inline">|</span>
+              <span>Паливо таблиці: <strong id="footerTotalFuel" class="text-amber-700 font-bold font-mono">0 кг</strong> <span id="footerTotalFuelEquiv" class="text-slate-400 font-mono text-[11px]">(≈ 0.00 л)</span></span>
             </div>
           </div>
         </div>
@@ -559,35 +536,6 @@
     <!-- TAB 2: ROUTE SECTION FUEL CALCULATOR -->
     <div id="tabContentRoute" class="space-y-6 hidden">
 
-      <!-- Top Section Banner -->
-      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-md border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-2xl shadow-inner shrink-0">
-            <i class="fa-solid fa-route"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <h2 class="text-base sm:text-lg font-bold tracking-tight">Розрахунок витрати палива на перегоні</h2>
-              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
-                rf1 ≤ lw ≤ rf2
-              </span>
-            </div>
-            <p class="text-xs text-slate-300 mt-0.5">Визначення витрати дизельного пального на перевізну роботу методом лінійної інтерполяції питомої норми за вагою поїзда</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 self-start md:self-auto">
-          <button type="button" id="routeLoadSampleBtn" class="px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition flex items-center gap-1.5 font-medium shadow-xs active:scale-95">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span>Приклад</span>
-          </button>
-          <button type="button" id="routeClearFieldsBtn" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-rose-600/80 text-slate-300 hover:text-white rounded-xl transition flex items-center gap-1.5 font-medium border border-slate-700 active:scale-95">
-            <i class="fa-solid fa-rotate-left"></i>
-            <span>Скинути</span>
-          </button>
-        </div>
-      </div>
-
       <!-- Main Layout Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
@@ -596,12 +544,25 @@
 
           <!-- Inputs Card -->
           <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-5">
-            <div>
-              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 mb-1">
-                <i class="fa-solid fa-sliders text-amber-500"></i>
-                Вхідні параметри ділянки та поїзда
-              </h3>
-              <p class="text-xs text-slate-500">Заповніть еталонні норми з тягового паспорта та фактичні параметри рейсу</p>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 mb-1">
+                  <i class="fa-solid fa-sliders text-amber-500"></i>
+                  Вхідні параметри ділянки та поїзда
+                </h3>
+                <p class="text-xs text-slate-500">Заповніть еталонні норми з тягового паспорта та фактичні параметри рейсу</p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button type="button" id="routeLoadSampleBtn" class="px-2.5 py-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl transition flex items-center gap-1.5 font-medium border border-indigo-200 active:scale-95 shadow-xs">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>Приклад</span>
+                </button>
+                <button type="button" id="routeClearFieldsBtn" class="px-2.5 py-1.5 text-xs bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl transition flex items-center gap-1.5 font-medium border border-slate-200 active:scale-95 shadow-xs">
+                  <i class="fa-solid fa-rotate-left"></i>
+                  <span>Скинути</span>
+                </button>
+              </div>
             </div>
 
             <!-- Group 1: Reference Norms (rf1, rf2, rsw1, rsw2) -->
@@ -613,57 +574,63 @@
                 <span class="text-[11px] text-slate-400 font-mono">інтервал ваги</span>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <!-- rf1 -->
-                <div>
-                  <label for="route_rf1" class="block text-xs font-semibold text-slate-600 mb-1">
-                    Еталонна вага 1 (<span class="font-mono font-bold text-indigo-700">rf1</span>)
-                  </label>
-                  <div class="relative">
-                    <input type="number" id="route_rf1" step="any" min="0" placeholder="2000"
-                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">т</span>
+              <div class="space-y-3">
+                <!-- Pair 1: rf1 and rf2 -->
+                <div class="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+                  <!-- rf1 -->
+                  <div>
+                    <label for="route_rf1" class="block text-xs font-semibold text-slate-600 mb-1">
+                      Еталонна вага 1
+                    </label>
+                    <div class="relative">
+                      <input type="number" id="route_rf1" step="any" min="0" placeholder="2000"
+                        class="w-full pl-2.5 sm:pl-3 pr-8 sm:pr-10 py-2 sm:py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                      <span class="absolute right-2.5 sm:right-3 top-2 sm:top-2.5 text-xs text-slate-400 font-medium font-mono">т</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 mt-0.5 block">нижня межа ваги</span>
                   </div>
-                  <span class="text-[10px] text-slate-400 mt-0.5 block">нижня межа еталонної ваги</span>
+
+                  <!-- rf2 -->
+                  <div>
+                    <label for="route_rf2" class="block text-xs font-semibold text-slate-600 mb-1">
+                      Еталонна вага 2
+                    </label>
+                    <div class="relative">
+                      <input type="number" id="route_rf2" step="any" min="0" placeholder="3000"
+                        class="w-full pl-2.5 sm:pl-3 pr-8 sm:pr-10 py-2 sm:py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                      <span class="absolute right-2.5 sm:right-3 top-2 sm:top-2.5 text-xs text-slate-400 font-medium font-mono">т</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 mt-0.5 block">верхня межа ваги</span>
+                  </div>
                 </div>
 
-                <!-- rf2 -->
-                <div>
-                  <label for="route_rf2" class="block text-xs font-semibold text-slate-600 mb-1">
-                    Еталонна вага 2 (<span class="font-mono font-bold text-indigo-700">rf2</span>)
-                  </label>
-                  <div class="relative">
-                    <input type="number" id="route_rf2" step="any" min="0" placeholder="3000"
-                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">т</span>
+                <!-- Pair 2: rsw1 and rsw2 -->
+                <div class="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+                  <!-- rsw1 -->
+                  <div>
+                    <label for="route_rsw1" class="block text-xs font-semibold text-slate-600 mb-1">
+                      Питома норма 1
+                    </label>
+                    <div class="relative">
+                      <input type="number" id="route_rsw1" step="any" min="0" placeholder="50.0"
+                        class="w-full pl-2.5 sm:pl-3 pr-8 sm:pr-10 py-2 sm:py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                      <span class="absolute right-2.5 sm:right-3 top-2 sm:top-2.5 text-xs text-slate-400 font-medium font-mono">кг</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 mt-0.5 block">норма для ваги 1</span>
                   </div>
-                  <span class="text-[10px] text-slate-400 mt-0.5 block">верхня межа еталонної ваги</span>
-                </div>
 
-                <!-- rsw1 -->
-                <div>
-                  <label for="route_rsw1" class="block text-xs font-semibold text-slate-600 mb-1">
-                    Питома норма 1 (<span class="font-mono font-bold text-amber-700">rsw1</span>)
-                  </label>
-                  <div class="relative">
-                    <input type="number" id="route_rsw1" step="any" min="0" placeholder="50.0"
-                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">кг</span>
+                  <!-- rsw2 -->
+                  <div>
+                    <label for="route_rsw2" class="block text-xs font-semibold text-slate-600 mb-1">
+                      Питома норма 2
+                    </label>
+                    <div class="relative">
+                      <input type="number" id="route_rsw2" step="any" min="0" placeholder="40.0"
+                        class="w-full pl-2.5 sm:pl-3 pr-8 sm:pr-10 py-2 sm:py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                      <span class="absolute right-2.5 sm:right-3 top-2 sm:top-2.5 text-xs text-slate-400 font-medium font-mono">кг</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 mt-0.5 block">норма для ваги 2</span>
                   </div>
-                  <span class="text-[10px] text-slate-400 mt-0.5 block">норма для ваги rf1 (кг / 10⁴ т·км)</span>
-                </div>
-
-                <!-- rsw2 -->
-                <div>
-                  <label for="route_rsw2" class="block text-xs font-semibold text-slate-600 mb-1">
-                    Питома норма 2 (<span class="font-mono font-bold text-amber-700">rsw2</span>)
-                  </label>
-                  <div class="relative">
-                    <input type="number" id="route_rsw2" step="any" min="0" placeholder="40.0"
-                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">кг</span>
-                  </div>
-                  <span class="text-[10px] text-slate-400 mt-0.5 block">норма для ваги rf2 (кг / 10⁴ т·км)</span>
                 </div>
               </div>
             </div>
@@ -677,66 +644,38 @@
                 <span class="text-[11px] text-slate-400 font-mono">фактичний рейс</span>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div class="grid grid-cols-2 gap-2.5 sm:gap-3.5">
                 <!-- lw -->
                 <div>
                   <label for="route_lw" class="block text-xs font-semibold text-slate-600 mb-1">
-                    Фактична вага (<span class="font-mono font-bold text-emerald-700">lw</span>)
+                    Фактична вага
                   </label>
                   <div class="relative">
                     <input type="number" id="route_lw" step="any" min="0" placeholder="2500"
-                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">т</span>
+                      class="w-full pl-2.5 sm:pl-3 pr-8 sm:pr-10 py-2 sm:py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl font-mono font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <span class="absolute right-2.5 sm:right-3 top-2 sm:top-2.5 text-xs text-slate-400 font-medium font-mono">т</span>
                   </div>
-                  <span class="text-[10px] text-slate-400 mt-0.5 block">фактична маса поїзда / локомотива</span>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">фактична маса поїзда</span>
                 </div>
 
                 <!-- rl -->
                 <div>
                   <label for="route_rl" class="block text-xs font-semibold text-slate-600 mb-1">
-                    Довжина ділянки (<span class="font-mono font-bold text-emerald-700">rl</span>)
+                    Довжина ділянки
                   </label>
                   <div class="relative">
                     <input type="number" id="route_rl" step="any" min="0" placeholder="100"
-                      class="w-full pl-3 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">км</span>
+                      class="w-full pl-2.5 sm:pl-3 pr-8 sm:pr-10 py-2 sm:py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl font-mono font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <span class="absolute right-2.5 sm:right-3 top-2 sm:top-2.5 text-xs text-slate-400 font-medium font-mono">км</span>
                   </div>
-                  <span class="text-[10px] text-slate-400 mt-0.5 block">довжина маршруту / перегону</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Constraint Check Card: Interactive Visual Progress Bar -->
-            <div id="routeConstraintCard" class="p-4 rounded-2xl border transition-all duration-200 bg-emerald-50/60 border-emerald-200">
-              <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2">
-                  <span id="routeConstraintIcon" class="w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                    <i class="fa-solid fa-check"></i>
-                  </span>
-                  <span class="text-xs font-bold text-slate-800">Перевірка обмеження:</span>
-                  <code class="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-800">rf1 ≤ lw ≤ rf2</code>
-                </div>
-                <span id="routeConstraintStatusBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  В межах діапазону
-                </span>
-              </div>
-
-              <!-- Visual progress track -->
-              <div class="relative pt-2 pb-1">
-                <div class="h-3 w-full bg-slate-200 rounded-full overflow-hidden relative">
-                  <div id="routeConstraintProgress" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 50%;"></div>
-                </div>
-                <div class="flex justify-between items-center text-[11px] font-mono text-slate-500 mt-1.5">
-                  <span id="routeBarMinLabel">rf1: 2000 т</span>
-                  <span id="routeBarCurrentLabel" class="font-bold text-slate-800">lw: 2500 т (50%)</span>
-                  <span id="routeBarMaxLabel">rf2: 3000 т</span>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">довжина маршруту</span>
                 </div>
               </div>
 
-              <!-- Alert message if constraint violated -->
-              <div id="routeConstraintError" class="hidden mt-2 p-3 rounded-xl bg-rose-100/90 border border-rose-300 text-rose-800 text-xs flex items-center gap-2.5 font-medium">
+              <!-- Constraint Alert message (implicit: only visible if violated) -->
+              <div id="routeConstraintError" class="hidden p-3 rounded-xl bg-rose-100/90 border border-rose-300 text-rose-800 text-xs flex items-center gap-2.5 font-medium">
                 <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base shrink-0"></i>
-                <span id="routeConstraintErrorText">Помилка: вага lw повинна бути між rf1 та rf2!</span>
+                <span id="routeConstraintErrorText">Помилка: фактична вага повинна бути в межах допустимого діапазону!</span>
               </div>
             </div>
 
@@ -751,38 +690,38 @@
                 </span>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div class="grid grid-cols-2 gap-2.5 sm:gap-3.5">
                 <!-- total_carts -->
                 <div>
                   <label for="route_tc" class="block text-xs font-semibold text-slate-600 mb-1">
-                    Всього вагонів (<span class="font-mono font-bold text-amber-800">total_carts / tc</span>)
+                    Всього вагонів
                   </label>
                   <div class="relative">
                     <input type="number" id="route_tc" step="1" min="0" placeholder="50"
-                      class="w-full pl-3 pr-12 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">ваг</span>
+                      class="w-full pl-2.5 sm:pl-3 pr-8 sm:pr-12 py-2 sm:py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <span class="absolute right-2.5 sm:right-3 top-2 sm:top-2.5 text-xs text-slate-400 font-medium font-mono">ваг</span>
                   </div>
-                  <span class="text-[10px] text-slate-400 mt-0.5 block">загальна кількість вагонів у складі</span>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">загальна к-сть вагонів</span>
                 </div>
 
                 <!-- empty_carts -->
                 <div>
                   <label for="route_ec" class="block text-xs font-semibold text-slate-600 mb-1">
-                    Порожніх вагонів (<span class="font-mono font-bold text-amber-800">empty_carts / ec</span>)
+                    Порожніх вагонів
                   </label>
                   <div class="relative">
                     <input type="number" id="route_ec" step="1" min="0" placeholder="0"
-                      class="w-full pl-3 pr-12 py-2.5 text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium font-mono">ваг</span>
+                      class="w-full pl-2.5 sm:pl-3 pr-8 sm:pr-12 py-2 sm:py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <span class="absolute right-2.5 sm:right-3 top-2 sm:top-2.5 text-xs text-slate-400 font-medium font-mono">ваг</span>
                   </div>
-                  <span class="text-[10px] text-slate-400 mt-0.5 block">кількість порожніх вагонів (ec ≤ tc)</span>
+                  <span class="text-[10px] text-slate-400 mt-0.5 block">кількість порожніх у складі</span>
                 </div>
               </div>
 
               <!-- Cart constraint error alert -->
               <div id="routeCartError" class="hidden p-3 rounded-xl bg-rose-100/90 border border-rose-300 text-rose-800 text-xs flex items-center gap-2.5 font-medium">
                 <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base shrink-0"></i>
-                <span id="routeCartErrorText">Помилка: кількість порожніх вагонів (ec) не може перевищувати загальну кількість (tc)!</span>
+                <span id="routeCartErrorText">Помилка: кількість порожніх вагонів не може перевищувати загальну кількість!</span>
               </div>
             </div>
 
@@ -806,7 +745,7 @@
 
             <!-- Big number display -->
             <div class="my-4">
-              <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Розрахована маса палива (fuel_amount):</div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Розрахована маса палива:</div>
               <div class="flex items-baseline gap-2 mt-1">
                 <span id="routeResultKg" class="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">0.00</span>
                 <span class="text-xl sm:text-2xl font-bold text-amber-400">кг</span>
@@ -1120,8 +1059,17 @@
     }
 
     // FUEL LOGIC & CONVERSIONS
-    function getTotalFuel() {
+    function getIntervalsFuel() {
+      return records.reduce((sum, r) => sum + (Number(r.fuel) || 0), 0);
+    }
+
+    function getAccumulatorFuel() {
       return fuelRecords.reduce((sum, item) => sum + item.amount, 0);
+    }
+
+    function getTotalFuel() {
+      const sum = getIntervalsFuel() + getAccumulatorFuel();
+      return Math.round(sum * 100) / 100;
     }
 
     // Convert between kg and litres using fuelDensity
@@ -1191,6 +1139,7 @@
       saveState();
       updateDensityPresetButtons();
       renderFuel();
+      renderTimeTable();
       updateTabDensityBadge();
       if (typeof calculateRouteFuel === 'function') calculateRouteFuel();
       showToast(`Густину встановлено: ${fuelDensity.toFixed(3)} кг/л`);
@@ -1232,11 +1181,14 @@
       updateFuelUnitUI();
       saveState();
       renderFuel();
+      renderTimeTable();
     }
 
     function renderFuel() {
       updateFuelUnitUI();
       const totalFuel = getTotalFuel();
+      const intervalsFuel = getIntervalsFuel();
+      const accumFuel = getAccumulatorFuel();
       const equivalents = getFuelEquivalents(totalFuel, fuelUnit, fuelDensity);
 
       const formattedTotal = (Number.isInteger(totalFuel) ? totalFuel : totalFuel.toFixed(2));
@@ -1250,15 +1202,33 @@
 
       document.getElementById('sum-fuel-main').innerHTML = `${formattedTotal} <span class="fuel-unit-label font-bold text-sm">${fuelUnit}</span>`;
       document.getElementById('sum-fuel-converted').textContent = topConvertedText;
-      document.getElementById('fuel-count-badge').textContent = `${fuelRecords.length} дій`;
 
-      // Log banner balance
+      const intervalsWithFuel = records.filter(r => r.fuel && r.fuel > 0).length;
+      const totalEntries = intervalsWithFuel + fuelRecords.length;
+      document.getElementById('fuel-count-badge').textContent = `${totalEntries} дій`;
+
+      const breakdownEl = document.getElementById('sum-fuel-breakdown');
+      if (breakdownEl) {
+        if (intervalsFuel > 0 && accumFuel !== 0) {
+          breakdownEl.textContent = `інтервали: ${intervalsFuel.toFixed(1)} · акум: ${accumFuel > 0 ? '+' : ''}${accumFuel.toFixed(1)} ${fuelUnit}`;
+          breakdownEl.classList.remove('hidden');
+        } else if (intervalsFuel > 0) {
+          breakdownEl.textContent = `з ${intervalsWithFuel} інтервалів`;
+          breakdownEl.classList.remove('hidden');
+        } else {
+          breakdownEl.classList.add('hidden');
+        }
+      }
+
+      // Log banner balance (specifically for accumulator operations)
+      const accumEq = getFuelEquivalents(accumFuel, fuelUnit, fuelDensity);
+      const formattedAccum = (Number.isInteger(accumFuel) ? accumFuel : accumFuel.toFixed(2));
       if (fuelUnit === 'кг') {
-        document.getElementById('logHeaderPrimary').textContent = `${formattedTotal} кг`;
-        document.getElementById('logHeaderConverted').textContent = `≈ ${formattedLitres} л`;
+        document.getElementById('logHeaderPrimary').textContent = `${formattedAccum} кг`;
+        document.getElementById('logHeaderConverted').textContent = `≈ ${accumEq.litres.toFixed(2)} л`;
       } else {
-        document.getElementById('logHeaderPrimary').textContent = `${formattedTotal} л`;
-        document.getElementById('logHeaderConverted').textContent = `≈ ${formattedKg} кг`;
+        document.getElementById('logHeaderPrimary').textContent = `${formattedAccum} л`;
+        document.getElementById('logHeaderConverted').textContent = `≈ ${accumEq.kg.toFixed(2)} кг`;
       }
       document.getElementById('fuelLogCounter').textContent = `${fuelRecords.length} операцій`;
 
@@ -1341,9 +1311,15 @@
       }
 
       let filteredSum = 0;
+      let filteredFuelSum = 0;
       displayedRecords.forEach((rec, idx) => {
         filteredSum += rec.duration;
+        filteredFuelSum += (Number(rec.fuel) || 0);
         const cat = CATEGORIES[rec.category] || CATEGORIES.hot;
+
+        const fuelDisplay = (rec.fuel && rec.fuel > 0)
+          ? `<span class="font-bold text-amber-700">${rec.fuel}</span> <span class="text-[10px] text-amber-600 font-medium fuel-unit-label">${fuelUnit}</span>`
+          : `<span class="text-slate-300 font-normal">—</span>`;
 
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition group';
@@ -1360,6 +1336,7 @@
           </td>
           <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">${rec.duration} хв</td>
           <td class="py-2.5 px-3 text-right font-mono text-xs text-slate-500">${formatHoursMinutes(rec.duration)}</td>
+          <td class="py-2.5 px-3 text-right font-mono whitespace-nowrap">${fuelDisplay}</td>
           <td class="py-2.5 px-3 text-xs text-slate-600 max-w-[150px] truncate" title="${rec.comment || ''}">
             ${rec.comment ? `<span class="italic text-slate-600">${escapeHtml(rec.comment)}</span>` : '<span class="text-slate-300">—</span>'}
           </td>
@@ -1372,25 +1349,40 @@
         tbody.appendChild(tr);
       });
 
+      filteredFuelSum = Math.round(filteredFuelSum * 100) / 100;
+      const fuelEquiv = getFuelEquivalents(filteredFuelSum, fuelUnit, fuelDensity);
+      const altFuelText = fuelUnit === 'кг'
+        ? `(≈ ${fuelEquiv.litres.toFixed(2)} л)`
+        : `(≈ ${fuelEquiv.kg.toFixed(2)} кг)`;
+
       document.getElementById('filteredStats').textContent = `Показано: ${displayedRecords.length} з ${records.length} записів`;
       document.getElementById('footerTotalMin').textContent = `${filteredSum} хв`;
       document.getElementById('footerTotalHm').textContent = formatHoursMinutes(filteredSum);
+      const footerTotalFuelEl = document.getElementById('footerTotalFuel');
+      if (footerTotalFuelEl) footerTotalFuelEl.textContent = `${filteredFuelSum} ${fuelUnit}`;
+      const footerTotalFuelEquivEl = document.getElementById('footerTotalFuelEquiv');
+      if (footerTotalFuelEquivEl) footerTotalFuelEquivEl.textContent = altFuelText;
     }
 
-    function addRecord(startTime, endTime, category, comment = '') {
+    function addRecord(startTime, endTime, category, comment = '', fuel = 0) {
       const duration = calculateDuration(startTime, endTime);
+      const parsedFuel = (typeof fuel === 'number' && !isNaN(fuel) && fuel > 0)
+        ? Math.round(fuel * 100) / 100
+        : 0;
       const newRec = {
         id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         start: startTime,
         end: endTime,
         duration: duration,
         category: category,
-        comment: comment.trim()
+        comment: comment.trim(),
+        fuel: parsedFuel
       };
       records.push(newRec);
       saveState();
       renderOverallTotals();
       renderTimeTable();
+      renderFuel();
       return newRec;
     }
 
@@ -1399,6 +1391,7 @@
       saveState();
       renderOverallTotals();
       renderTimeTable();
+      renderFuel();
       showToast('Період часу видалено');
     };
 
@@ -1440,6 +1433,16 @@
 
           const category = detectCategoryFromText(rest);
 
+          let fuel = 0;
+          const fuelMatch = rest.match(/(?:паливо[:\s]*)?(\d+(?:[.,]\d+)?)\s*(?:кг|л|kg|l)\b/i);
+          if (fuelMatch) {
+            const parsedF = parseFloat(fuelMatch[1].replace(',', '.'));
+            if (!isNaN(parsedF) && parsedF > 0) {
+              fuel = Math.round(parsedF * 100) / 100;
+              rest = rest.replace(fuelMatch[0], ' ');
+            }
+          }
+
           let cleanComment = rest;
           CATEGORIES[category].keywords.forEach(kw => {
             const re = new RegExp(kw, 'gi');
@@ -1447,7 +1450,7 @@
           });
           cleanComment = cleanComment.replace(/^[,\-–—.\s]+|[,\-–—.\s]+$/g, '').trim();
 
-          addRecord(start, end, category, cleanComment);
+          addRecord(start, end, category, cleanComment, fuel);
           countAdded++;
         }
       });
@@ -1473,6 +1476,7 @@
         saveState();
         updateDensityPresetButtons();
         renderFuel();
+        renderTimeTable();
         updateTabDensityBadge();
         if (typeof calculateRouteFuel === 'function') calculateRouteFuel();
       }
@@ -1515,6 +1519,7 @@
     const singleEntryForm = document.getElementById('singleEntryForm');
     const startInput = document.getElementById('startTime');
     const endInput = document.getElementById('endTime');
+    const intervalFuelInput = document.getElementById('intervalFuel');
     const liveDurationHint = document.getElementById('liveDurationHint');
 
     function updateLiveDuration() {
@@ -1535,18 +1540,21 @@
       const end = endInput.value;
       const cat = document.querySelector('input[name="category"]:checked')?.value || 'hot';
       const comment = document.getElementById('comment').value;
+      const fuelVal = intervalFuelInput ? parseFloat(intervalFuelInput.value) : 0;
+      const fuel = (!isNaN(fuelVal) && fuelVal > 0) ? fuelVal : 0;
 
       if (!start || !end) {
         showToast('Вкажіть початок та кінець інтервалу', false);
         return;
       }
 
-      addRecord(start, end, cat, comment);
+      addRecord(start, end, cat, comment, fuel);
       showToast('Інтервал успішно додано');
 
       // Auto chain start to end
       startInput.value = end;
       endInput.value = '';
+      if (intervalFuelInput) intervalFuelInput.value = '';
       document.getElementById('comment').value = '';
       updateLiveDuration();
       endInput.focus();
@@ -1571,10 +1579,10 @@
 
     document.getElementById('loadSampleBtn').addEventListener('click', () => {
       document.getElementById('smartTextInput').value = `8:23-8:30 холодний простій
-8:30-8:45 гарячий простій (прогрів двигуна)
-8:45-8:50 ман робота
-8:50-9:40 рух перегін
-9:40-10:15 гарячий простій очікування відправлення`;
+8:30-8:45 гарячий простій 3 кг (прогрів двигуна)
+8:45-8:50 ман робота 5 кг
+8:50-9:40 рух перегін 42 кг
+9:40-10:15 гарячий простій 4 кг очікування відправлення`;
     });
 
     // Full Report Generator and Copier
@@ -1600,7 +1608,10 @@
       });
 
       const totalFuel = getTotalFuel();
+      const intervalsFuel = getIntervalsFuel();
+      const accumFuel = getAccumulatorFuel();
       const equivalents = getFuelEquivalents(totalFuel, fuelUnit, fuelDensity);
+      const formattedTotal = (Number.isInteger(totalFuel) ? totalFuel : totalFuel.toFixed(2));
 
       let report = `📋 ЗВІТ РОБОТИ ТА ПАЛИВА\n`;
       report += `====================================\n`;
@@ -1612,23 +1623,25 @@
       report += `------------------------------------\n`;
       report += `⏳ ВСЬОГО ЧАСУ:       ${totals.all} хв (${formatHoursMinutes(totals.all)})\n`;
       report += `====================================\n`;
-      report += `⛽ АКУМУЛЯТОР ПАЛИВА:\n`;
+      report += `⛽ ПАЛИВО РАЗОМ:\n`;
       report += `Густина (питома вага): ${fuelDensity.toFixed(3)} кг/л\n`;
-      report += `Маса:   ${equivalents.kg.toFixed(2)} кг\n`;
-      report += `Об'єм:  ${equivalents.litres.toFixed(2)} л\n`;
-      report += `Всього дій у журналі:  ${fuelRecords.length}\n`;
-
+      report += `Загальна витрата:      ${formattedTotal} ${fuelUnit} (маса: ${equivalents.kg.toFixed(2)} кг, об'єм: ${equivalents.litres.toFixed(2)} л)\n`;
+      if (intervalsFuel > 0 || accumFuel !== 0) {
+        report += `• З інтервалів часу:   ${intervalsFuel.toFixed(2)} ${fuelUnit}\n`;
+        report += `• З акумулятора:       ${accumFuel.toFixed(2)} ${fuelUnit} (${fuelRecords.length} операцій)\n`;
+      }
       if (fuelRecords.length > 0) {
-        report += `Операції: ` + fuelRecords.map(f => `${f.amount > 0 ? '+' : ''}${f.amount}${fuelUnit}${f.note ? ' [' + f.note + ']' : ''}`).join(', ') + `\n`;
+        report += `Операції акумулятора:  ` + fuelRecords.map(f => `${f.amount > 0 ? '+' : ''}${f.amount}${fuelUnit}${f.note ? ' [' + f.note + ']' : ''}`).join(', ') + `\n`;
       }
       report += `====================================\n\n`;
 
       if (records.length > 0) {
-        report += `Деталізація часу (${records.length} інтервалів):\n`;
+        report += `Деталізація часу та палива (${records.length} інтервалів):\n`;
         records.forEach((r, idx) => {
           const catName = CATEGORIES[r.category]?.name || r.category;
           const comment = r.comment ? ` [${r.comment}]` : '';
-          report += `${idx + 1}. ${formatTimeDisplay(r.start)}-${formatTimeDisplay(r.end)}: ${r.duration} хв — ${catName}${comment}\n`;
+          const fuelText = (r.fuel && r.fuel > 0) ? ` | ${r.fuel} ${fuelUnit}` : '';
+          report += `${idx + 1}. ${formatTimeDisplay(r.start)}-${formatTimeDisplay(r.end)}: ${r.duration} хв${fuelText} — ${catName}${comment}\n`;
         });
       }
 
@@ -1847,10 +1860,6 @@
       const tc = (!isNaN(tcRaw) && tcRaw > 0) ? Math.floor(tcRaw) : 0;
       const ec = (!isNaN(ecRaw) && ecRaw > 0) ? Math.floor(ecRaw) : 0;
 
-      const card = document.getElementById('routeConstraintCard');
-      const icon = document.getElementById('routeConstraintIcon');
-      const badge = document.getElementById('routeConstraintStatusBadge');
-      const progress = document.getElementById('routeConstraintProgress');
       const errBox = document.getElementById('routeConstraintError');
       const errText = document.getElementById('routeConstraintErrorText');
       const cartErrBox = document.getElementById('routeCartError');
@@ -1862,19 +1871,11 @@
 
       const allFilled = !isNaN(rf1) && !isNaN(rf2) && !isNaN(rsw1) && !isNaN(rsw2) && !isNaN(lw) && !isNaN(rl);
 
-      document.getElementById('routeBarMinLabel').textContent = !isNaN(rf1) ? `rf1: ${rf1} т` : 'rf1: — т';
-      document.getElementById('routeBarMaxLabel').textContent = !isNaN(rf2) ? `rf2: ${rf2} т` : 'rf2: — т';
-
       if (!allFilled) {
-        document.getElementById('routeBarCurrentLabel').textContent = !isNaN(lw) ? `lw: ${lw} т` : 'lw: — т';
-        progress.style.width = '0%';
-        card.className = 'p-4 rounded-2xl border transition-all duration-200 bg-slate-50 border-slate-200';
-        icon.className = 'w-6 h-6 rounded-lg bg-slate-400 text-white flex items-center justify-center text-xs font-bold shadow-xs';
-        icon.innerHTML = '<i class="fa-solid fa-minus"></i>';
-        badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700';
-        badge.textContent = 'Очікування вводу';
-        errBox.classList.add('hidden');
+        if (errBox) errBox.classList.add('hidden');
         if (cartErrBox) cartErrBox.classList.add('hidden');
+        if (lwEl) lwEl.classList.remove('border-rose-400', 'bg-rose-50/40');
+        if (rf2El) rf2El.classList.remove('border-rose-400', 'bg-rose-50/40');
 
         document.getElementById('routeResultKg').textContent = '0.00';
         document.getElementById('routeResultLitres').textContent = '≈ 0.00 л';
@@ -1911,23 +1912,16 @@
 
       // Constraint check 1: rf2 > rf1
       if (rf2 <= rf1) {
-        card.className = 'p-4 rounded-2xl border transition-all duration-200 bg-rose-50 border-rose-200';
-        icon.className = 'w-6 h-6 rounded-lg bg-rose-500 text-white flex items-center justify-center text-xs font-bold shadow-xs';
-        icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-        badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200';
-        badge.textContent = 'Помилка меж rf1/rf2';
-        errText.textContent = `Помилка: Верхня еталонна вага rf2 (${rf2} т) має бути строго більшою за нижню rf1 (${rf1} т)!`;
-        errBox.classList.remove('hidden');
+        if (errBox && errText) {
+          errText.textContent = `Помилка: Верхня еталонна вага (${rf2} т) має бути строго більшою за нижню (${rf1} т)!`;
+          errBox.classList.remove('hidden');
+        }
+        if (rf2El) rf2El.classList.add('border-rose-400', 'bg-rose-50/40');
+        if (lwEl) lwEl.classList.remove('border-rose-400', 'bg-rose-50/40');
 
         disableRouteResultState('Помилка даних');
         return null;
       }
-
-      // Progress bar percentage
-      let pct = ((lw - rf1) / (rf2 - rf1)) * 100;
-      let clampedPct = Math.max(0, Math.min(100, pct));
-      progress.style.width = clampedPct + '%';
-      document.getElementById('routeBarCurrentLabel').textContent = `lw: ${lw} т (${Math.round(pct)}%)`;
 
       // Constraint check 2: rf1 <= lw <= rf2
       const isUnder = lw < rf1;
@@ -1935,37 +1929,30 @@
       const isValidWeight = !isUnder && !isOver;
 
       if (!isValidWeight) {
-        card.className = 'p-4 rounded-2xl border transition-all duration-200 bg-rose-50 border-rose-300';
-        icon.className = 'w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center text-xs font-bold shadow-xs';
-        icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
-        progress.className = 'h-full bg-rose-500 rounded-full transition-all duration-300';
-        badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300';
-        badge.textContent = isUnder ? `lw < rf1 (нижче норми)` : `lw > rf2 (вище норми)`;
-
-        errText.textContent = isUnder
-          ? `Порушення обмеження: фактична вага lw (${lw} т) менша за допустиму нижню межу rf1 (${rf1} т). Діапазон: ${rf1} — ${rf2} т.`
-          : `Порушення обмеження: фактична вага lw (${lw} т) більша за допустиму верхню межу rf2 (${rf2} т). Діапазон: ${rf1} — ${rf2} т.`;
-        errBox.classList.remove('hidden');
+        if (errBox && errText) {
+          errText.textContent = isUnder
+            ? `Порушення обмеження: фактична вага (${lw} т) менша за допустиму нижню межу (${rf1} т). Діапазон: ${rf1} — ${rf2} т.`
+            : `Порушення обмеження: фактична вага (${lw} т) більша за допустиму верхню межу (${rf2} т). Діапазон: ${rf1} — ${rf2} т.`;
+          errBox.classList.remove('hidden');
+        }
+        if (lwEl) lwEl.classList.add('border-rose-400', 'bg-rose-50/40');
+        if (rf2El) rf2El.classList.remove('border-rose-400', 'bg-rose-50/40');
 
         disableRouteResultState('Поза діапазоном');
         return null;
       }
 
       // Valid weight constraint state
-      card.className = 'p-4 rounded-2xl border transition-all duration-200 bg-emerald-50/70 border-emerald-300';
-      icon.className = 'w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-xs';
-      icon.innerHTML = '<i class="fa-solid fa-check"></i>';
-      progress.className = 'h-full bg-emerald-500 rounded-full transition-all duration-300';
-      badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
-      badge.textContent = 'В межах діапазону';
-      errBox.classList.add('hidden');
+      if (errBox) errBox.classList.add('hidden');
+      if (lwEl) lwEl.classList.remove('border-rose-400', 'bg-rose-50/40');
+      if (rf2El) rf2El.classList.remove('border-rose-400', 'bg-rose-50/40');
 
       // Constraint check 3: Empty carts (ec <= tc)
       if (cartErrBox && cartErrText && cartRatioBadge) {
         if (tc > 0 && ec > tc) {
           cartErrBox.classList.remove('hidden');
           cartErrText.textContent = `Помилка: кількість порожніх вагонів (${ec} ваг) перевищує загальну кількість (${tc} ваг)!`;
-          cartRatioBadge.textContent = 'Помилка ec > tc';
+          cartRatioBadge.textContent = 'Помилка порожніх вагонів';
           cartRatioBadge.className = 'text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300';
           disableRouteResultState('Помилка вагонів');
           return null;
@@ -2270,6 +2257,57 @@
         switchMainTab('shift');
       }
     });
+
+    // Collapsible Header on Scroll
+    (function initCollapsibleHeader() {
+      const header = document.getElementById('mainHeader');
+      const headerContainer = document.getElementById('headerContainer');
+      const headerSubtitle = document.getElementById('headerSubtitle');
+      if (!header || !headerContainer) return;
+
+      let lastScrollY = window.scrollY;
+      let isTicking = false;
+
+      function updateHeader() {
+        const currentScrollY = window.scrollY;
+
+        // Near the top: fully expanded
+        if (currentScrollY <= 20) {
+          header.classList.remove('-translate-y-full');
+          headerContainer.classList.remove('py-1.5');
+          headerContainer.classList.add('py-3');
+          if (headerSubtitle) headerSubtitle.classList.remove('hidden');
+          lastScrollY = currentScrollY;
+          isTicking = false;
+          return;
+        }
+
+        // When scrolled: compact mode
+        headerContainer.classList.remove('py-3');
+        headerContainer.classList.add('py-1.5');
+        if (headerSubtitle) headerSubtitle.classList.add('hidden');
+
+        // Direction-aware collapse
+        const diff = currentScrollY - lastScrollY;
+        if (diff > 8 && currentScrollY > 70) {
+          // Scrolling down: hide header
+          header.classList.add('-translate-y-full');
+        } else if (diff < -6) {
+          // Scrolling up: reveal compact header
+          header.classList.remove('-translate-y-full');
+        }
+
+        lastScrollY = currentScrollY;
+        isTicking = false;
+      }
+
+      window.addEventListener('scroll', () => {
+        if (!isTicking) {
+          window.requestAnimationFrame(updateHeader);
+          isTicking = true;
+        }
+      }, { passive: true });
+    })();
   </script>
 </body>
 </html>
