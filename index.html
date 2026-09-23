@@ -497,7 +497,12 @@
                   <th class="py-3 px-3">Категорія</th>
                   <th class="py-3 px-3 text-right">Хвилини</th>
                   <th class="py-3 px-3 text-right">Год:Хв</th>
-                  <th class="py-3 px-3 text-right">Паливо (<span class="fuel-unit-label">кг</span>)</th>
+                  <th class="py-3 px-3 text-right">
+                    <span class="inline-flex items-center gap-1.5">
+                      <span>Паливо (<span class="fuel-unit-label">кг</span>)</span>
+                      <i class="fa-solid fa-pen text-[9px] text-amber-500/70" title="Клітинки редагуються"></i>
+                    </span>
+                  </th>
                   <th class="py-3 px-3">Примітка</th>
                   <th class="py-3 px-3 text-center">Дія</th>
                 </tr>
@@ -1296,6 +1301,59 @@
       document.getElementById('record-count-badge').textContent = `${records.length} інт.`;
     }
 
+    function updateTableFuelTotals() {
+      const filter = document.getElementById('filterCategory').value;
+      const displayedRecords = records.filter(rec => filter === 'all' || rec.category === filter);
+      let filteredFuelSum = 0;
+      displayedRecords.forEach(rec => {
+        filteredFuelSum += (Number(rec.fuel) || 0);
+      });
+      filteredFuelSum = Math.round(filteredFuelSum * 100) / 100;
+      const fuelEquiv = getFuelEquivalents(filteredFuelSum, fuelUnit, fuelDensity);
+      const altFuelText = fuelUnit === 'кг'
+        ? `(≈ ${fuelEquiv.litres.toFixed(2)} л)`
+        : `(≈ ${fuelEquiv.kg.toFixed(2)} кг)`;
+
+      const footerTotalFuelEl = document.getElementById('footerTotalFuel');
+      if (footerTotalFuelEl) footerTotalFuelEl.textContent = `${filteredFuelSum} ${fuelUnit}`;
+      const footerTotalFuelEquivEl = document.getElementById('footerTotalFuelEquiv');
+      if (footerTotalFuelEquivEl) footerTotalFuelEquivEl.textContent = altFuelText;
+    }
+
+    window.handleRecordFuelChange = function(id, inputEl) {
+      const rec = records.find(r => r.id === id);
+      if (!rec) return;
+
+      const rawVal = inputEl.value.trim();
+      let numVal = parseFloat(rawVal);
+      if (isNaN(numVal) || numVal < 0) {
+        numVal = 0;
+      } else {
+        numVal = Math.round(numVal * 100) / 100;
+      }
+
+      rec.fuel = numVal;
+      saveState();
+      renderFuel();
+      updateTableFuelTotals();
+
+      if (numVal > 0) {
+        inputEl.className = 'w-16 sm:w-20 text-right font-mono text-xs font-bold text-amber-700 bg-amber-50/50 border border-amber-200 hover:border-amber-400 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-400/30 rounded-lg px-2 py-1 outline-none transition';
+      } else {
+        inputEl.className = 'w-16 sm:w-20 text-right font-mono text-xs font-medium text-slate-400 bg-slate-50/70 border border-slate-200/80 hover:border-amber-400 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-400/30 rounded-lg px-2 py-1 outline-none transition';
+      }
+    };
+
+    window.handleRecordFuelBlur = function(id, inputEl) {
+      const rec = records.find(r => r.id === id);
+      if (!rec) return;
+      if (rec.fuel > 0) {
+        inputEl.value = rec.fuel;
+      } else {
+        inputEl.value = '';
+      }
+    };
+
     function renderTimeTable() {
       const filter = document.getElementById('filterCategory').value;
       const tbody = document.getElementById('entriesTableBody');
@@ -1311,15 +1369,33 @@
       }
 
       let filteredSum = 0;
-      let filteredFuelSum = 0;
       displayedRecords.forEach((rec, idx) => {
         filteredSum += rec.duration;
-        filteredFuelSum += (Number(rec.fuel) || 0);
         const cat = CATEGORIES[rec.category] || CATEGORIES.hot;
 
-        const fuelDisplay = (rec.fuel && rec.fuel > 0)
-          ? `<span class="font-bold text-amber-700">${rec.fuel}</span> <span class="text-[10px] text-amber-600 font-medium fuel-unit-label">${fuelUnit}</span>`
-          : `<span class="text-slate-300 font-normal">—</span>`;
+        const hasFuel = (rec.fuel && rec.fuel > 0);
+        const fuelVal = hasFuel ? rec.fuel : '';
+        const fuelInputClasses = hasFuel
+          ? 'w-16 sm:w-20 text-right font-mono text-xs font-bold text-amber-700 bg-amber-50/50 border border-amber-200 hover:border-amber-400 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-400/30 rounded-lg px-2 py-1 outline-none transition'
+          : 'w-16 sm:w-20 text-right font-mono text-xs font-medium text-slate-400 bg-slate-50/70 border border-slate-200/80 hover:border-amber-400 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-400/30 rounded-lg px-2 py-1 outline-none transition';
+
+        const fuelCell = `
+          <div class="inline-flex items-center justify-end gap-1">
+            <input
+              type="number"
+              step="any"
+              min="0"
+              placeholder="0"
+              value="${fuelVal}"
+              title="Натисніть для зміни витрати палива"
+              class="${fuelInputClasses}"
+              oninput="handleRecordFuelChange('${rec.id}', this)"
+              onblur="handleRecordFuelBlur('${rec.id}', this)"
+              onkeydown="if(event.key==='Enter') this.blur();"
+            />
+            <span class="text-[10px] text-amber-700/80 font-bold fuel-unit-label select-none">${fuelUnit}</span>
+          </div>
+        `;
 
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition group';
@@ -1336,7 +1412,7 @@
           </td>
           <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">${rec.duration} хв</td>
           <td class="py-2.5 px-3 text-right font-mono text-xs text-slate-500">${formatHoursMinutes(rec.duration)}</td>
-          <td class="py-2.5 px-3 text-right font-mono whitespace-nowrap">${fuelDisplay}</td>
+          <td class="py-1.5 px-3 text-right font-mono whitespace-nowrap">${fuelCell}</td>
           <td class="py-2.5 px-3 text-xs text-slate-600 max-w-[150px] truncate" title="${rec.comment || ''}">
             ${rec.comment ? `<span class="italic text-slate-600">${escapeHtml(rec.comment)}</span>` : '<span class="text-slate-300">—</span>'}
           </td>
@@ -1349,19 +1425,10 @@
         tbody.appendChild(tr);
       });
 
-      filteredFuelSum = Math.round(filteredFuelSum * 100) / 100;
-      const fuelEquiv = getFuelEquivalents(filteredFuelSum, fuelUnit, fuelDensity);
-      const altFuelText = fuelUnit === 'кг'
-        ? `(≈ ${fuelEquiv.litres.toFixed(2)} л)`
-        : `(≈ ${fuelEquiv.kg.toFixed(2)} кг)`;
-
       document.getElementById('filteredStats').textContent = `Показано: ${displayedRecords.length} з ${records.length} записів`;
       document.getElementById('footerTotalMin').textContent = `${filteredSum} хв`;
       document.getElementById('footerTotalHm').textContent = formatHoursMinutes(filteredSum);
-      const footerTotalFuelEl = document.getElementById('footerTotalFuel');
-      if (footerTotalFuelEl) footerTotalFuelEl.textContent = `${filteredFuelSum} ${fuelUnit}`;
-      const footerTotalFuelEquivEl = document.getElementById('footerTotalFuelEquiv');
-      if (footerTotalFuelEquivEl) footerTotalFuelEquivEl.textContent = altFuelText;
+      updateTableFuelTotals();
     }
 
     function addRecord(startTime, endTime, category, comment = '', fuel = 0) {
